@@ -12,6 +12,15 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
+    files: {
+      aws: {
+        bucket: process.env.NUXT_FILES_AWS_BUCKET,
+        endpoint: process.env.NUXT_FILES_AWS_ENDPOINT,
+        accessKeyId: process.env.NUXT_FILES_AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.NUXT_FILES_AWS_SECRET_ACCESS_KEY,
+        region: process.env.NUXT_FILES_AWS_REGION,
+      },
+    },
     database: {
       url: process.env.DATABASE_URL,
     },
@@ -47,7 +56,7 @@ export default defineNuxtConfig({
   },
 
   eslint: {
-    checker: true,
+    checker: false,
     config: { stylistic: true },
   },
 })

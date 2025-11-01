@@ -1,5 +1,15 @@
 services:
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    command: tunnel --no-autoupdate --url localhost:3000
-    network_mode: host
+  minio:
+    image: minio/minio:latest
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        "mkdir -p /data/uploads && minio server /data --console-address ':9001'",
+      ]

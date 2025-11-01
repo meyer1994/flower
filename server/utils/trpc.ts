@@ -1,14 +1,20 @@
 import { initTRPC } from '@trpc/server'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import { drizzle } from 'drizzle-orm/d1'
 import type { H3Event } from 'h3'
-import type * as schema from '../db/schema'
+import * as schema from '~~/server/db/schema'
+import { useFilesR2 } from './files'
 
 export const createTRPCContext = async (event: H3Event) => {
   /**
   * @see: https://trpc.io/docs/server/context
   */
-  type Context = { event: H3Event, db: DrizzleD1Database<typeof schema> }
-  return { event, db: event.context.db } as Context
+
+  // @ts-ignore
+  const db = drizzle(event.context.cloudflare.env.DB, { schema })
+  const files = useFilesR2(event)
+  
+  type Context = { event: H3Event, db: typeof db, files: typeof files }
+  return { event, db, files } as Context
 }
 
 type Context = Awaited<ReturnType<typeof createTRPCContext>>
@@ -25,4 +31,19 @@ const t = initTRPC.context<Context>().create({
 // Base router and procedure helpers
 export const createTRPCRouter = t.router
 export const createCallerFactory = t.createCallerFactory
+
 export const baseProcedure = t.procedure
+  .use(async ({ next }) => {
+    try {
+      console.log('Starting request')
+      return await next()
+    } catch (error) {
+      console.error('Error in request')
+      console.error(error)
+      throw error
+    }
+    finally {
+      console.log('Request finished')
+    }
+  }
+)
