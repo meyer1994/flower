@@ -75,14 +75,7 @@ export const appRouter = createTRPCRouter({
       )
       .mutation(async ({ input, ctx }) => {
         const buffer = await input.file.arrayBuffer()
-        console.log('buffer', buffer)
         await ctx.files.put(input.key, new Uint8Array(buffer))
-      }),
-
-    url: baseProcedure
-      .input(z.object({ key: z.string() }))
-      .query(async ({ input, ctx }) => {
-        return await ctx.files.url(input.key)
       }),
   }),
 })

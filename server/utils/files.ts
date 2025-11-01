@@ -7,11 +7,12 @@ type Metadata = { contentType?: string }
 
 export type FileMetadata = {
   key: string
+  url?: string
   size?: number
   lastModified?: Date
 }
 
-interface Storage {
+export interface FileStorage {
   put(key: string, body: Body, meta?: Metadata): Promise<void>
   get(key: string): Promise<ReadableStream>
   url(key: string, opts: S3UrlOptions): Promise<string>
@@ -33,7 +34,7 @@ type S3UrlOptions = {
 }
 
 
-export class S3Storage {
+export class S3Storage implements FileStorage {
   client: S3Client
   bucket: string
 
@@ -58,7 +59,7 @@ export class S3Storage {
    * @param meta.contentType
    */
   async put(key: string, body: Body, meta?: Metadata) {
-    return await this.client.send(new PutObjectCommand({
+    await this.client.send(new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
       Body: body,
@@ -100,29 +101,59 @@ export class S3Storage {
    * List all objects in S3 bucket
    */
   async list(): Promise<FileMetadata[]> {
-    const command = new ListObjectsV2Command({
-      Bucket: this.bucket,
-    })
+    const command = new ListObjectsV2Command({ Bucket: this.bucket })
     const response = await this.client.send(command)
-    return (response.Contents || []).map((item) => ({
-      key: item.Key || '',
-      size: item.Size,
-      lastModified: item.LastModified,
-    }))
+
+    const items = response.Contents || []
+    return await Promise.all(
+      items.map(async (i) => ({
+        key: i.Key || '',
+        size: i.Size,
+        lastModified: i.LastModified,
+        url: await this.url(i.Key || ''),
+      }))
+    )
   }
 }
 
 export const useFilesS3 = (event?: H3Event) => {
   const config = useRuntimeConfig(event)
   return new S3Storage({
-    bucket: config.files.aws.bucket,
-    awsRegion: config.files.aws.region,
-    awsEndpoint: config.files.aws.endpoint,
-    awsAccessKeyId: config.files.aws.accessKeyId,
-    awsSecretAccessKey: config.files.aws.secretAccessKey,
+    bucket: config.files.s3.bucket,
+    awsRegion: config.files.s3.region,
+    awsEndpoint: config.files.s3.endpoint,
+    awsAccessKeyId: config.files.s3.accessKeyId,
+    awsSecretAccessKey: config.files.s3.secretAccessKey,
   })
 }
 
+type R2StorageOptions = {
+  bucket: string
+  r2Endpoint: string
+  r2AccessKeyId: string
+  r2SecretAccessKey: string
+}
+
+class R2Storage extends S3Storage {
+  constructor(opts: R2StorageOptions) {
+    super({
+      bucket: opts.bucket,
+      awsRegion: 'auto',
+      awsEndpoint: opts.r2Endpoint,
+      awsAccessKeyId: opts.r2AccessKeyId,
+      awsSecretAccessKey: opts.r2SecretAccessKey,
+    })
+  }
+}
+
+
+// Helper to get R2Storage using runtime config
 export const useFilesR2 = (event?: H3Event) => {
-  return useFilesS3(event)
+  const config = useRuntimeConfig(event)
+  return new R2Storage({
+    bucket: config.files.r2.bucket,
+    r2AccessKeyId: config.files.r2.accessKeyId,
+    r2SecretAccessKey: config.files.r2.secretAccessKey,
+    r2Endpoint: config.files.r2.endpoint,
+  })
 }

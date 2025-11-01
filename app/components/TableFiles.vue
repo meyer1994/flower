@@ -17,7 +17,8 @@ const emit = defineEmits<{
   'refresh-table': []
 }>()
 
-type Keys = keyof Item | 'actions'
+// url is shown in the actions column
+type Keys = keyof Omit<Item, 'url'> | 'actions'
 
 // Table columns
 const columns: TableColumn<Item>[] = [
@@ -160,6 +161,16 @@ function formatBytes(bytes: number): string {
       <!-- Actions Column -->
       <template #actions-cell="{ row }">
         <div class="flex items-center gap-1">
+          <UButton
+            icon="i-lucide-download"
+            color="primary"
+            variant="ghost"
+            size="sm"
+            title="Download file"
+            :disabled="!row.original.url"
+            :href="row.original.url || '#'"
+            target="_blank"
+          />
           <UButton
             icon="i-lucide-trash-2"
             color="error"

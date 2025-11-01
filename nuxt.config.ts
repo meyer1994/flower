@@ -13,12 +13,20 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     files: {
-      aws: {
+      type: process.env.NUXT_FILES_TYPE || 's3' as 's3' | 'r2' | undefined,
+      s3: {
         bucket: process.env.NUXT_FILES_AWS_BUCKET,
         endpoint: process.env.NUXT_FILES_AWS_ENDPOINT,
         accessKeyId: process.env.NUXT_FILES_AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.NUXT_FILES_AWS_SECRET_ACCESS_KEY,
         region: process.env.NUXT_FILES_AWS_REGION,
+      },
+      r2: {
+        bucket: process.env.NUXT_FILES_R2_BUCKET,
+        accessKeyId: process.env.NUXT_FILES_R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.NUXT_FILES_R2_SECRET_ACCESS_KEY,
+        accountId: process.env.NUXT_FILES_R2_ACCOUNT_ID,
+        endpoint: process.env.NUXT_FILES_R2_ENDPOINT,
       },
     },
     database: {

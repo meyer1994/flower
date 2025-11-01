@@ -2,16 +2,28 @@ import { initTRPC } from '@trpc/server'
 import { drizzle } from 'drizzle-orm/d1'
 import type { H3Event } from 'h3'
 import * as schema from '~~/server/db/schema'
-import { useFilesR2 } from './files'
+import { FileStorage, useFilesR2 } from './files'
 
 export const createTRPCContext = async (event: H3Event) => {
   /**
   * @see: https://trpc.io/docs/server/context
   */
+  const config = useRuntimeConfig(event)
+
+  let files: FileStorage
+  switch (config.files.type) {
+    case 's3':
+      files = useFilesS3(event)
+      break
+    case 'r2':
+      files = useFilesR2(event)
+      break
+    default:
+      throw new Error('File storage not configured')
+  }
 
   // @ts-ignore
   const db = drizzle(event.context.cloudflare.env.DB, { schema })
-  const files = useFilesR2(event)
   
   type Context = { event: H3Event, db: typeof db, files: typeof files }
   return { event, db, files } as Context

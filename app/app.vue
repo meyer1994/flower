@@ -24,14 +24,8 @@ const items = [
 ] satisfies TabsItem[]
 
 const active = computed({
-  get() {
-    return (route.query.tab as string) || 'users'
-  },
-  set(tab) {
-    router.push({
-      query: { tab },
-    })
-  },
+  get: () => (route.query.tab as string) || 'users',
+  set: (v: string) => router.push({ query: { tab: v } }),
 })
 
 const onFileSubmit = async (e: FormFileData) => {
