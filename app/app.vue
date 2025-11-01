@@ -36,11 +36,18 @@ const onFileSubmit = async (e: FormFileData) => {
   await $trpc.files.put.mutate(form)
   await refreshFiles()
 }
+
+const doFetch = async () => {
+  $fetch('/api/trpc/files/test/123')
+}
 </script>
 
 <template>
   <UApp>
     <div class="flex flex-col gap-4 p-4">
+      <UButton @click="doFetch">
+        banana
+      </UButton>
       <UTabs
         v-model="active"
         :items="items"

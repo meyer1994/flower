@@ -33,11 +33,6 @@ const columns: TableColumn<Item>[] = [
     header: 'Size',
   },
   {
-    id: 'lastModified' as const,
-    accessorKey: 'lastModified',
-    header: 'Last Modified',
-  },
-  {
     id: 'actions' as const,
     header: 'Ações',
   },
@@ -50,7 +45,6 @@ const MAP_ID_TO_LABEL: Record<string, string> = columns
 const visible: Ref<Record<Keys, boolean>> = ref({
   key: true,
   size: true,
-  lastModified: true,
   actions: true,
 })
 
@@ -148,16 +142,6 @@ function formatBytes(bytes: number): string {
         </span>
       </template>
 
-      <!-- Last Modified Column -->
-      <template #lastModified-cell="{ row }">
-        <NuxtTime
-          v-if="row.original?.lastModified"
-          :datetime="row.original.lastModified"
-          title
-        />
-        <span v-else>N/A</span>
-      </template>
-
       <!-- Actions Column -->
       <template #actions-cell="{ row }">
         <div class="flex items-center gap-1">
@@ -169,6 +153,16 @@ function formatBytes(bytes: number): string {
             title="Download file"
             :disabled="!row.original.url"
             :href="row.original.url || '#'"
+            target="_blank"
+          />
+          <UButton
+            icon="i-lucide-eye"
+            color="primary"
+            variant="ghost"
+            size="sm"
+            title="View file"
+            :disabled="!row.original.key"
+            :href="`/api/files/${row.original.key}`"
             target="_blank"
           />
           <UButton

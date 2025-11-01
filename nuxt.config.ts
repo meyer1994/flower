@@ -21,13 +21,6 @@ export default defineNuxtConfig({
         secretAccessKey: process.env.NUXT_FILES_AWS_SECRET_ACCESS_KEY,
         region: process.env.NUXT_FILES_AWS_REGION,
       },
-      r2: {
-        bucket: process.env.NUXT_FILES_R2_BUCKET,
-        accessKeyId: process.env.NUXT_FILES_R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.NUXT_FILES_R2_SECRET_ACCESS_KEY,
-        accountId: process.env.NUXT_FILES_R2_ACCOUNT_ID,
-        endpoint: process.env.NUXT_FILES_R2_ENDPOINT,
-      },
     },
     database: {
       url: process.env.DATABASE_URL,
@@ -38,7 +31,7 @@ export default defineNuxtConfig({
     transpile: ['trpc-nuxt'],
   },
 
-  compatibilityDate: '2025-05-15',
+  compatibilityDate: '2025-11-01',
 
   nitro: {
     preset: 'cloudflare_module',

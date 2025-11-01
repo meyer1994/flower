@@ -1,4 +1,4 @@
-import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, type PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type { H3Event } from 'h3'
 
@@ -9,12 +9,16 @@ export type FileMetadata = {
   key: string
   url?: string
   size?: number
-  lastModified?: Date
+}
+
+type FileGet = {
+  stream: ReadableStream
+  meta: Metadata
 }
 
 export interface FileStorage {
   put(key: string, body: Body, meta?: Metadata): Promise<void>
-  get(key: string): Promise<ReadableStream>
+  get(key: string): Promise<FileGet>
   url(key: string, opts: S3UrlOptions): Promise<string>
   list(): Promise<FileMetadata[]>
 }
@@ -71,13 +75,18 @@ export class S3Storage implements FileStorage {
    * Get file from S3
    * @param key
    */
-  async get(key: string): Promise<ReadableStream> {
+  async get(key: string): Promise<FileGet> {
     const res = await this.client.send(new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
     }))
+
     if (!res.Body) throw new Error('File not found')
-    return res.Body.transformToWebStream()
+
+    return { 
+      stream: res.Body.transformToWebStream(), 
+      meta: { contentType: res.ContentType } 
+    }
   }
 
 
@@ -85,7 +94,7 @@ export class S3Storage implements FileStorage {
    * Get a presigned URL for reading or writing to S3
    * (Useful for direct browser uploads/downloads)
    * @param key
-   * @param opts
+   * @param opts.expiresIn
    */
   async url(key: string, opts: S3UrlOptions = {}): Promise<string> {
     const command = new GetObjectCommand({
@@ -109,7 +118,6 @@ export class S3Storage implements FileStorage {
       items.map(async (i) => ({
         key: i.Key || '',
         size: i.Size,
-        lastModified: i.LastModified,
         url: await this.url(i.Key || ''),
       }))
     )
@@ -124,36 +132,5 @@ export const useFilesS3 = (event?: H3Event) => {
     awsEndpoint: config.files.s3.endpoint,
     awsAccessKeyId: config.files.s3.accessKeyId,
     awsSecretAccessKey: config.files.s3.secretAccessKey,
-  })
-}
-
-type R2StorageOptions = {
-  bucket: string
-  r2Endpoint: string
-  r2AccessKeyId: string
-  r2SecretAccessKey: string
-}
-
-class R2Storage extends S3Storage {
-  constructor(opts: R2StorageOptions) {
-    super({
-      bucket: opts.bucket,
-      awsRegion: 'auto',
-      awsEndpoint: opts.r2Endpoint,
-      awsAccessKeyId: opts.r2AccessKeyId,
-      awsSecretAccessKey: opts.r2SecretAccessKey,
-    })
-  }
-}
-
-
-// Helper to get R2Storage using runtime config
-export const useFilesR2 = (event?: H3Event) => {
-  const config = useRuntimeConfig(event)
-  return new R2Storage({
-    bucket: config.files.r2.bucket,
-    r2AccessKeyId: config.files.r2.accessKeyId,
-    r2SecretAccessKey: config.files.r2.secretAccessKey,
-    r2Endpoint: config.files.r2.endpoint,
   })
 }
