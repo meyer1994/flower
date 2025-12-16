@@ -23,7 +23,7 @@
     "@nuxt/eslint": "1.10.0",
     "@nuxt/ui": "^4.1.0",
     "@trpc/client": "^11.7.1",
-    "@trpc/server": "^11.7.1",
+    "@trpc/server": "^11.8.0",
     "@vueuse/core": "^14.0.0",
     "@vueuse/nuxt": "^14.0.0",
     "drizzle-orm": "^0.44.7",
