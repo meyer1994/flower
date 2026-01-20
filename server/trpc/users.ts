@@ -1,10 +1,10 @@
 import { desc, eq } from 'drizzle-orm'
 import * as z from 'zod'
 import { TUsers } from '~~/server/db/schema'
-import { baseProcedure, createTRPCRouter } from '~~/server/utils/trpc'
+import { createTRPCRouter, protectedProcedure } from '~~/server/trpc/init'
 
 export const usersRouter = createTRPCRouter({
-  create: baseProcedure
+  create: protectedProcedure
     .input(z.object({ name: z.string() }))
     .mutation(async ({ input, ctx }) => {
       console.info(`[tRPC] Creating user: ${input.name}`)
@@ -15,7 +15,7 @@ export const usersRouter = createTRPCRouter({
       return user
     }),
 
-  delete: baseProcedure
+  delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       console.info(`[tRPC] Deleting user: ${input.id}`)
@@ -23,7 +23,7 @@ export const usersRouter = createTRPCRouter({
       return { success: true }
     }),
 
-  update: baseProcedure
+  update: protectedProcedure
     .input(z.object({ id: z.string(), name: z.string() }))
     .mutation(async ({ input, ctx }) => {
       console.info(`[tRPC] Updating user: ${input.id}`)
@@ -35,7 +35,7 @@ export const usersRouter = createTRPCRouter({
       return user
     }),
 
-  list: baseProcedure
+  list: protectedProcedure
     .query(async ({ ctx }) => {
       const users = await ctx.db
         .select()

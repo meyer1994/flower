@@ -34,7 +34,7 @@ export default defineNuxtPlugin(async () => {
     if (!event) throw new Error('No event found')
 
     const { appRouter } = await import('~~/server/trpc')
-    const { createInternalCaller } = await import('~~/server/utils/trpc')
+    const { createInternalCaller } = await import('~~/server/trpc/init')
 
     const caller = await createInternalCaller(appRouter, event!)
 

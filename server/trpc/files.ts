@@ -1,9 +1,10 @@
 import * as z from 'zod'
-import { baseProcedure, createTRPCRouter } from '~~/server/utils/trpc'
+import type { TRPCContext } from '~~/server/trpc/init'
+import { createTRPCRouter, protectedProcedure } from '~~/server/trpc/init'
 import { onFileUpload } from '../tasks/onFileUpload'
 
 export const filesRouter = createTRPCRouter({
-  create: baseProcedure
+  create: protectedProcedure
     .input(z
       .instanceof(FormData)
       .transform(fd => Object.fromEntries(fd.entries()))
@@ -18,10 +19,10 @@ export const filesRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       console.info(`[tRPC] Creating file: ${input.file.name}`)
       await ctx.storage.put(input.file.name, input.file)
-      ctx.event.waitUntil(onFileUpload(input.file.name, ctx))
+      ctx.event.waitUntil(onFileUpload(input.file.name, ctx as TRPCContext))
     }),
 
-  delete: baseProcedure
+  delete: protectedProcedure
     .input(z.object({ key: z.string() }))
     .mutation(async ({ input, ctx }) => {
       console.info(`[tRPC] Deleting file: ${input.key}`)
@@ -31,7 +32,7 @@ export const filesRouter = createTRPCRouter({
       ])
     }),
 
-  list: baseProcedure
+  list: protectedProcedure
     .query(async ({ ctx }) => {
       const items = await ctx.storage.list()
       console.info(`[tRPC] Listing files: ${items.length} items`)

@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { baseProcedure, createTRPCRouter } from '../utils/trpc'
+import { createTRPCRouter, protectedProcedure } from './init'
 
 export const vectorRouter = createTRPCRouter({
-  search: baseProcedure
+  search: protectedProcedure
     .input(z.object({
       query: z.string().min(1),
       prefix: z.string().optional(),
