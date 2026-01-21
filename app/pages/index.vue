@@ -7,6 +7,7 @@ const items = computed<NavigationMenuItem[]>(() => {
   if (loggedIn.value) {
     return [
       { label: 'Home', to: '/', icon: 'i-lucide-home' },
+      { label: 'Profile', to: '/profile', icon: 'i-lucide-user' },
       { label: 'Sign Out', onClick: onSignOut, icon: 'i-lucide-log-out' },
     ]
   }

@@ -16,20 +16,7 @@ declare module 'h3' {
     storage: FileStorage
     db: DrizzleD1Database<typeof schema>
     vector: VectorStorage
-  }
-}
-
-declare module '#app' {
-  interface NuxtApp {
-    $auth: ReturnType<typeof useAuth>
-    $trpc: ReturnType<typeof useTRPC>
-  }
-}
-
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $auth: ReturnType<typeof useAuth>
-    $trpc: ReturnType<typeof useTRPC>
+    kv: KVNamespace
   }
 }
 

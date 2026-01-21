@@ -35,6 +35,12 @@
 			"bucket_name": "flower"
 		}
 	],
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "a93e975a94f9452494767c8244563579"
+		}
+	],
 	/**
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
