@@ -1,13 +1,11 @@
-export default defineNuxtPlugin(async (app) => {
-  if (!app.payload.serverRendered) {
-    const auth = useAuth()
-    await auth.fetchSession()
+export default defineNuxtPlugin(async (nuxtApp) => {
+  if (!nuxtApp.payload.serverRendered) {
+    await useAuth().fetchSession()
   }
-  else if (Boolean(app.payload.prerenderedAt) || Boolean(app.payload.isCached)) {
+  else if (Boolean(nuxtApp.payload.prerenderedAt) || Boolean(nuxtApp.payload.isCached)) {
     // To avoid hydration mismatch
-    app.hook('app:mounted', async () => {
-      const auth = useAuth()
-      await auth.fetchSession()
+    nuxtApp.hook('app:mounted', async () => {
+      await useAuth().fetchSession()
     })
   }
 })

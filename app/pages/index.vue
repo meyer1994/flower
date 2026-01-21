@@ -19,7 +19,7 @@ const items = computed<NavigationMenuItem[]>(() => {
 
 async function onSignOut() {
   await signOut()
-  await navigateTo('/')
+  await reloadNuxtApp({ path: '/' })
 }
 </script>
 
@@ -32,7 +32,7 @@ async function onSignOut() {
     </UHeader>
 
     <div class="flex flex-col items-center justify-center gap-4 p-4">
-      <template v-if="loggedIn === true">
+      <template v-if="loggedIn">
         <PageDemo />
       </template>
 

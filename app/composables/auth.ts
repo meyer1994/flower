@@ -3,17 +3,8 @@ import type {
   InferSessionFromClient,
   InferUserFromClient,
 } from 'better-auth/client'
-import { createAuthClient } from 'better-auth/client'
-import { defu } from 'defu'
+import { createAuthClient } from 'better-auth/vue'
 import type { RouteLocationRaw } from 'vue-router'
-
-// Copied from:
-// https://github.com/atinux/nuxthub-better-auth/blob/main/app/composables/auth.ts
-
-interface RuntimeAuthConfig {
-  redirectUserTo: RouteLocationRaw | string
-  redirectGuestTo: RouteLocationRaw | string
-}
 
 export function useAuth() {
   const url = useRequestURL()
@@ -24,29 +15,16 @@ export function useAuth() {
     fetchOptions: { headers },
   })
 
-  const options = defu(useRuntimeConfig().public.auth as Partial<RuntimeAuthConfig>, {
-    redirectUserTo: '/',
-    redirectGuestTo: '/',
-  })
   const session = useState<InferSessionFromClient<ClientOptions> | null>('auth:session', () => null)
   const user = useState<InferUserFromClient<ClientOptions> | null>('auth:user', () => null)
   const sessionFetching = import.meta.server ? ref(false) : useState('auth:sessionFetching', () => false)
 
   const fetchSession = async () => {
-    if (sessionFetching.value) {
-      console.log('already fetching session')
-      return
-    }
+    if (sessionFetching.value) return
 
     sessionFetching.value = true
-    const { data } = await client.getSession({
-      fetchOptions: {
-        headers,
-      },
-    })
-
+    const { data } = await client.getSession()
     session.value = data?.session || null
-    user.value = data?.user || null
     sessionFetching.value = false
 
     return data
@@ -65,15 +43,19 @@ export function useAuth() {
     loggedIn: computed(() => !!session.value),
     signIn: client.signIn,
     signUp: client.signUp,
-    async signOut({ redirectTo }: { redirectTo?: RouteLocationRaw } = {}) {
-      const res = await client.signOut()
-      session.value = null
-      user.value = null
-      if (redirectTo) await navigateTo(redirectTo)
-      return res
-    },
-    options,
     fetchSession,
     client,
+
+    async signOut({ redirectTo }: { redirectTo?: RouteLocationRaw } = {}) {
+      await client.signOut({
+        fetchOptions: {
+          onSuccess: async () => {
+            session.value = null
+            user.value = null
+            if (redirectTo) await reloadNuxtApp({ path: redirectTo.toString() })
+          },
+        },
+      })
+    },
   }
 }

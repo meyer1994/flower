@@ -7,11 +7,7 @@ import {
 import { createTRPCNuxtClient, httpBatchLink, httpLink } from 'trpc-nuxt/client'
 import type { AppRouter } from '~~/server/trpc'
 
-let trpc: ReturnType<typeof createTRPCNuxtClient<AppRouter>> | null = null
-
 export const useTRPC = () => {
-  if (trpc) return trpc
-
   const url = useRequestURL()
   url.pathname = '/api/trpc'
 
@@ -28,6 +24,5 @@ export const useTRPC = () => {
     false: httpBatchLink({ url }),
   }))
 
-  trpc = createTRPCNuxtClient<AppRouter>({ links })
-  return trpc
+  return createTRPCNuxtClient<AppRouter>({ links })
 }

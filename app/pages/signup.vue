@@ -50,7 +50,7 @@ async function onSubmit(e: FormSubmitEvent<Schema>) {
     name: e.data.email,
     password: e.data.password,
   })
-  await navigateTo('/')
+  await reloadNuxtApp({ path: '/' })
 }
 </script>
 

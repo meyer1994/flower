@@ -54,6 +54,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   await auth.signIn.email({
     email: event.data.email,
     password: event.data.password,
+    rememberMe: event.data.remember,
   })
   await navigateTo('/')
 }

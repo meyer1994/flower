@@ -8,6 +8,7 @@ export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
 
     emailAndPassword: {
       enabled: true,
+      requireEmailVerification: false,
     },
   })
 }
