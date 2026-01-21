@@ -1,24 +1,25 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-const auth = useAuth()
-const session = await auth.fetchSession()
+const { loggedIn, signOut } = useAuth()
 
-const items: NavigationMenuItem[] = []
+const items = computed<NavigationMenuItem[]>(() => {
+  if (loggedIn.value) {
+    return [
+      { label: 'Home', to: '/', icon: 'i-lucide-home' },
+      { label: 'Sign Out', onClick: onSignOut, icon: 'i-lucide-log-out' },
+    ]
+  }
 
-if (session) {
-  items.push({
-    label: 'Sign Out',
-    onClick: async () => {
-      await auth.signOut()
-      await reloadNuxtApp() // force page reload
-    },
-  })
-}
+  return [
+    { label: 'Sign In', to: '/signin', icon: 'i-lucide-log-in' },
+    { label: 'Sign Up', to: '/signup', icon: 'i-lucide-user-plus' },
+  ]
+})
 
-if (!session) {
-  items.push({ label: 'Sign In', to: '/signin' })
-  items.push({ label: 'Sign Up', to: '/signup' })
+async function onSignOut() {
+  await signOut()
+  await navigateTo('/')
 }
 </script>
 
@@ -31,7 +32,7 @@ if (!session) {
     </UHeader>
 
     <div class="flex flex-col items-center justify-center gap-4 p-4">
-      <template v-if="session">
+      <template v-if="loggedIn === true">
         <PageDemo />
       </template>
 

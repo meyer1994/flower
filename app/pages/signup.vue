@@ -11,9 +11,8 @@ type Schema = z.output<typeof schema>
 
 const toast = useToast()
 
-const auth = useAuth()
-const session = await auth.fetchSession()
-if (session) await navigateTo('/')
+const { session } = useAuth()
+if (session.value) await navigateTo('/')
 
 const fields: AuthFormField[] = [
   {

@@ -12,9 +12,9 @@ type Schema = z.output<typeof schema>
 
 const toast = useToast()
 
-const auth = useAuth()
-const session = await auth.fetchSession()
-if (session) await navigateTo('/')
+const { session, signIn } = useAuth()
+if (session.value) await navigateTo('/')
+watch(session, async v => v && await navigateTo('/'))
 
 const fields: AuthFormField[] = [
   {
@@ -54,10 +54,9 @@ const providers = [
 ]
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  await auth.signIn.email({
+  await signIn.email({
     email: event.data.email,
     password: event.data.password,
-    callbackURL: '/',
   })
 }
 </script>
