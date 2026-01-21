@@ -19,4 +19,18 @@ declare module 'h3' {
   }
 }
 
+declare module '#app' {
+  interface NuxtApp {
+    $auth: ReturnType<typeof useAuth>
+    $trpc: ReturnType<typeof useTRPC>
+  }
+}
+
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $auth: ReturnType<typeof useAuth>
+    $trpc: ReturnType<typeof useTRPC>
+  }
+}
+
 export { }

@@ -3,14 +3,14 @@ import type { AppRouterOutputs } from '~~/server/trpc'
 
 console.info('[App] Application initializing')
 
-const { $trpc } = useNuxtApp()
-const { data: dataUsers, refresh: refreshUsers } = await $trpc.users.list.useQuery()
-const { data: dataFiles, refresh: refreshFiles } = await $trpc.files.list.useQuery()
+const trpc = useTRPC()
+const { data: dataUsers, refresh: refreshUsers } = await trpc.users.list.useQuery()
+const { data: dataFiles, refresh: refreshFiles } = await trpc.files.list.useQuery()
 
 const onSubmitFile = async (e: File) => {
   const data = new FormData()
   data.append('file', e)
-  await $trpc.files.create.mutate(data)
+  await trpc.files.create.mutate(data)
   await refreshFiles()
 }
 
@@ -22,7 +22,7 @@ const isSearching = ref(false)
 const onSearch = async (e: { query: string, prefix?: string }) => {
   isSearching.value = true
   try {
-    const results = await $trpc.vector.search.query(e)
+    const results = await trpc.vector.search.query(e)
     searchResults.value = results
   }
   finally {
@@ -44,7 +44,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
 
           <FormUser
             @submit="async (e) => {
-              await $trpc.users.create.mutate(e)
+              await trpc.users.create.mutate(e)
               await refreshUsers()
             }"
           />
@@ -55,15 +55,15 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
               await refreshUsers()
             }"
             @update-user="async (e) => {
-              await $trpc.users.update.mutate(e)
+              await trpc.users.update.mutate(e)
               await refreshUsers()
             }"
             @delete-user="async (e) => {
-              await $trpc.users.delete.mutate(e)
+              await trpc.users.delete.mutate(e)
               await refreshUsers()
             }"
             @select-user="async (e) => {
-              await $trpc.users.update.mutate(e)
+              await trpc.users.update.mutate(e)
               await refreshUsers()
             }"
           />
@@ -91,7 +91,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
               console.debug('Downloading file:', e)
             }"
             @delete-file="async (e) => {
-              await $trpc.files.delete.mutate({ key: e.key })
+              await trpc.files.delete.mutate({ key: e.key })
               await refreshFiles()
             }"
           />
