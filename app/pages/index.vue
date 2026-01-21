@@ -34,6 +34,12 @@ if (!session) {
       <template v-if="session">
         <PageDemo />
       </template>
+
+      <template v-else>
+        <UPageCard title="Welcome to the app">
+          You are not logged in. Please sign in to continue.
+        </UPageCard>
+      </template>
     </div>
   </div>
 </template>
