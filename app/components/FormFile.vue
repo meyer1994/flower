@@ -15,9 +15,12 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 export type FormFileData = Schema
 
-type Props = { defaultValue?: Partial<Schema> }
+type Props = { defaultValue?: Partial<Schema>, loading?: boolean }
+const props = withDefaults(defineProps<Props>(), {
+  defaultValue: () => ({}),
+  loading: () => false,
+})
 
-const props = withDefaults(defineProps<Props>(), { defaultValue: () => ({}) })
 const state = reactive<Partial<Schema>>({ file: props.defaultValue?.file })
 watch(() => props.defaultValue, v => v && Object.assign(state, v))
 
@@ -28,6 +31,7 @@ const emits = defineEmits<{ submit: [e: File] }>()
   <UForm
     :schema="schema"
     :state="state"
+    :disabled="loading"
     class="flex flex-col gap-4"
     @submit.prevent="(e) => emits('submit', e.data.file)"
   >

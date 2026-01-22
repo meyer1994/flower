@@ -12,6 +12,8 @@ useHead({
 </script>
 
 <template>
+  <NuxtRouteAnnouncer />
+  <NuxtLoadingIndicator />
   <UApp>
     <NuxtPage />
   </UApp>

@@ -5,11 +5,16 @@ const schema = z.object({
   name: z.string().min(1),
 })
 
-type Schema = z.output<typeof schema>
-type Props = { defaultValue?: Partial<Schema> }
 export type FormNameData = Schema
 
-const props = withDefaults(defineProps<Props>(), { defaultValue: () => ({}) })
+type Schema = z.output<typeof schema>
+type Props = { defaultValue?: Partial<Schema>, loading?: boolean }
+
+const props = withDefaults(defineProps<Props>(), {
+  loading: () => false,
+  defaultValue: () => ({}),
+})
+
 const state = reactive<Partial<Schema>>({ name: props.defaultValue?.name ?? '' })
 watch(() => props.defaultValue, v => v && Object.assign(state, v))
 
@@ -20,6 +25,7 @@ const emits = defineEmits<{ submit: [e: Schema] }>()
   <UForm
     :schema="schema"
     :state="state"
+    :disabled="loading"
     class="flex flex-col gap-4"
     @submit.prevent="(e) => emits('submit', e.data)"
   >

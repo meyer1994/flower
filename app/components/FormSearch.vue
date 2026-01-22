@@ -9,9 +9,12 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 export type FormSearchData = Schema
 
-type Props = { defaultValue?: Partial<Schema> }
+type Props = { defaultValue?: Partial<Schema>, loading?: boolean }
+const props = withDefaults(defineProps<Props>(), {
+  defaultValue: () => ({}),
+  loading: () => false,
+})
 
-const props = withDefaults(defineProps<Props>(), { defaultValue: () => ({}) })
 const state = reactive<Partial<Schema>>({
   query: props.defaultValue?.query ?? '',
   prefix: props.defaultValue?.prefix ?? '',

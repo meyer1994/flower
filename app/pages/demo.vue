@@ -6,8 +6,8 @@ definePageMeta({ auth: true })
 const { $trpc } = useNuxtApp()
 
 const [
-  { data: dataUsers, refresh: refreshUsers, error: errorUsers },
-  { data: dataFiles, refresh: refreshFiles, error: errorFiles },
+  { data: dataUsers, refresh: refreshUsers, error: errorUsers, status: statusUsers },
+  { data: dataFiles, refresh: refreshFiles, error: errorFiles, status: statusFiles },
 ] = await Promise.all([
   $trpc.users.list.useQuery(undefined),
   $trpc.files.list.useQuery(undefined),
@@ -60,6 +60,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
           </template>
 
           <FormUser
+            :loading="statusUsers === 'pending'"
             @submit="async (e) => {
               await $trpc.users.create.mutate(e)
               await refreshUsers()
@@ -68,6 +69,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
 
           <TableUsers
             :items="dataUsers || []"
+            :loading="statusUsers === 'pending'"
             @refresh-table="async () => {
               await refreshUsers()
             }"
@@ -101,6 +103,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
 
           <TableFiles
             :items="dataFiles || []"
+            :loading="statusFiles === 'pending'"
             @refresh-table="async () => {
               await refreshFiles()
             }"
