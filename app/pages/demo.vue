@@ -2,6 +2,7 @@
 import type { AppRouterOutputs } from '~~/server/trpc'
 
 definePageMeta({ auth: true })
+
 const { $trpc } = useNuxtApp()
 
 const [
