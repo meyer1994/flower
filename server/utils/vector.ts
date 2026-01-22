@@ -2,7 +2,7 @@ import {
   CloudflareVectorizeStore,
   CloudflareWorkersAIEmbeddings,
 } from '@langchain/cloudflare'
-import type { FileStorage } from './storage'
+import type { H3Event } from 'h3'
 
 export interface VectorDocument {
   pageContent: string
@@ -16,9 +16,10 @@ type VectorSearch = {
 
 export interface VectorStorage {
   /**
-   * Fetch the file from storage, extract text, embed, and index it under that key.
-   * @param key - The storage key of the file
-   * @param metadata - Optional metadata to merge with default metadata
+   * Fetch the file from storage, extract text, embed, and index it under that
+   * key.
+   * @param key - The storage key of the file @param metadata - Optional
+   * metadata to merge with default metadata
    */
   set: (key: string, metadata?: Record<string, unknown>) => Promise<void>
 
@@ -47,37 +48,40 @@ export interface VectorStorage {
   list: (prefix?: string) => Promise<string[]>
 
   /**
-   * Performs similarity search, optionally restricted to keys matching a prefix.
-   * @param query - The search query
-   * @param options - Search options (prefix)
+   * Performs similarity search, optionally restricted to keys matching a
+   * prefix.
+   * @param query - The search query @param options - Search options (prefix)
    */
   search: (query: string, options?: VectorSearch) => Promise<VectorDocument[]>
 }
 
 export class CloudflareVectorizeStorage implements VectorStorage {
-  private store: CloudflareVectorizeStore
-  private storage: FileStorage
+  private env: Env
 
-  constructor(env: Cloudflare.Env, storage: FileStorage) {
+  private vectorize: CloudflareVectorizeStore
+  private embeddings: CloudflareWorkersAIEmbeddings
+
+  constructor(env: Env) {
+    this.env = env
+
     if (!env.AI) throw new Error('AI not found')
     if (!env.VECTORIZE) throw new Error('VECTORIZE not found')
+    if (!env.BUCKET) throw new Error('AI not found')
 
-    this.storage = storage
-
-    const embeddings = new CloudflareWorkersAIEmbeddings({
+    this.embeddings = new CloudflareWorkersAIEmbeddings({
       binding: env.AI,
       model: '@cf/baai/bge-small-en-v1.5',
     })
 
-    this.store = new CloudflareVectorizeStore(embeddings, {
+    this.vectorize = new CloudflareVectorizeStore(this.embeddings, {
       index: env.VECTORIZE,
     })
   }
 
   async set(key: string, metadata?: Record<string, unknown>): Promise<void> {
-    console.debug(`[Vector] Indexing: ${key}`)
-    const stream = await this.storage.get(key)
-    const reader = stream.getReader()
+    const stream = await this.env.BUCKET.get(key)
+    if (!stream?.body) throw new Error(`Object ${key} not found`)
+    const reader = stream.body.getReader()
     const decoder = new TextDecoder()
     let text = ''
 
@@ -88,7 +92,7 @@ export class CloudflareVectorizeStorage implements VectorStorage {
     }
     text += decoder.decode()
 
-    await this.store.addDocuments(
+    await this.vectorize.addDocuments(
       [
         {
           pageContent: text,
@@ -101,15 +105,15 @@ export class CloudflareVectorizeStorage implements VectorStorage {
       ],
       { ids: [key] },
     )
-    console.debug(`[Vector] Indexed: ${key}`)
   }
 
   async get(key: string): Promise<VectorDocument[]> {
-    // Note: CloudflareVectorizeStore doesn't have a direct "get by ID" that returns the content easily in LangChain
-    // but we can use similarity search with a filter or specific ID if supported.
-    // For now, we'll try to use similaritySearch with a filter if the implementation supports it,
-    // or we might need to use the underlying index.
-    const results = await this.store.similaritySearch('', 1, { key })
+    // Note: CloudflareVectorizeStore doesn't have a direct "get by ID" that
+    // returns the content easily in LangChain but we can use similarity search
+    // with a filter or specific ID if supported. For now, we'll try to use
+    // similaritySearch with a filter if the implementation supports it, or we
+    // might need to use the underlying index.
+    const results = await this.vectorize.similaritySearch('', 1, { key })
     return results.map(doc => ({
       pageContent: doc.pageContent,
       metadata: doc.metadata,
@@ -117,7 +121,7 @@ export class CloudflareVectorizeStorage implements VectorStorage {
   }
 
   async del(key: string): Promise<void> {
-    await this.store.delete({ ids: [key] })
+    await this.vectorize.delete({ ids: [key] })
   }
 
   async has(key: string): Promise<boolean> {
@@ -127,15 +131,13 @@ export class CloudflareVectorizeStorage implements VectorStorage {
 
   async list(_prefix?: string): Promise<string[]> {
     // This is tricky with Vectorize as it's not designed for listing keys.
-    // LangChain's CloudflareVectorizeStore doesn't expose a list method.
-    // This would typically require a separate database to track indexed keys
-    // or querying the Vectorize index directly if possible.
-    console.warn('VectorStorage.list is not fully implemented for CloudflareVectorizeStore')
+    // LangChain's CloudflareVectorizeStore doesn't expose a list method. This
+    // would typically require a separate database to track indexed keys or
+    // querying the Vectorize index directly if possible.
     return []
   }
 
   async search(query: string, options?: VectorSearch): Promise<VectorDocument[]> {
-    console.debug(`[Vector] Searching: "${query}"`)
     const filter: VectorizeVectorMetadataFilter = {}
 
     if (options?.prefix) {
@@ -146,8 +148,7 @@ export class CloudflareVectorizeStorage implements VectorStorage {
       }
     }
 
-    const results = await this.store.similaritySearchWithScore(query, 10, filter)
-    console.debug(`[Vector] Searched: "${query}" found ${results.length} results`)
+    const results = await this.vectorize.similaritySearchWithScore(query, 10, filter)
 
     return results.map(([doc, score]) => ({
       pageContent: doc.pageContent,
@@ -155,4 +156,9 @@ export class CloudflareVectorizeStorage implements VectorStorage {
       score,
     }))
   }
+}
+
+export const serverVector = (event: H3Event): VectorStorage => {
+  const env = event.context.cloudflare.env as unknown as Env
+  return new CloudflareVectorizeStorage(env)
 }

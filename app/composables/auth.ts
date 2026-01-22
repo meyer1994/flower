@@ -4,7 +4,6 @@ import type {
   InferUserFromClient,
 } from 'better-auth/client'
 import { createAuthClient } from 'better-auth/vue'
-import type { RouteLocationRaw } from 'vue-router'
 
 export function useAuth() {
   const url = useRequestURL()
@@ -15,19 +14,31 @@ export function useAuth() {
     fetchOptions: { headers },
   })
 
-  const session = useState<InferSessionFromClient<ClientOptions> | null>('auth:session', () => null)
-  const user = useState<InferUserFromClient<ClientOptions> | null>('auth:user', () => null)
-  const sessionFetching = import.meta.server ? ref(false) : useState('auth:sessionFetching', () => false)
+  type User = InferUserFromClient<ClientOptions>
+  type Session = InferSessionFromClient<ClientOptions>
+
+  const user = useState<User | null>('auth:user', () => null)
+  const session = useState<Session | null>('auth:session', () => null)
+
+  const isFetching = import.meta.server ? ref(false) : useState('auth:sessionFetching', () => false)
 
   const fetchSession = async () => {
-    if (sessionFetching.value) return
+    if (isFetching.value) return
 
-    sessionFetching.value = true
-    const { data } = await client.getSession()
-    session.value = data?.session || null
-    sessionFetching.value = false
-
-    return data
+    isFetching.value = true
+    try {
+      const { data } = await client.getSession()
+      session.value = data?.session || null
+      user.value = data?.user || null
+      return data
+    }
+    catch (error) {
+      console.error('[Auth] fetchSession error', error)
+      throw error
+    }
+    finally {
+      isFetching.value = false
+    }
   }
 
   if (import.meta.client) {
@@ -42,20 +53,9 @@ export function useAuth() {
     user,
     loggedIn: computed(() => !!session.value),
     signIn: client.signIn,
+    signOut: client.signOut,
     signUp: client.signUp,
     fetchSession,
     client,
-
-    async signOut({ redirectTo }: { redirectTo?: RouteLocationRaw } = {}) {
-      await client.signOut({
-        fetchOptions: {
-          onSuccess: async () => {
-            session.value = null
-            user.value = null
-            if (redirectTo) await reloadNuxtApp({ path: redirectTo.toString() })
-          },
-        },
-      })
-    },
   }
 }

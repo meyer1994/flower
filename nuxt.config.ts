@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     transpile: ['trpc-nuxt'],
   },
 
-  compatibilityDate: '2026-01-09',
+  compatibilityDate: '2026-01-21',
 
   nitro: {
     preset: 'cloudflare_module',

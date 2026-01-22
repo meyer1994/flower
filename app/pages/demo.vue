@@ -1,11 +1,31 @@
 <script setup lang="ts">
 import type { AppRouterOutputs } from '~~/server/trpc'
 
-console.info('[App] Application initializing')
+definePageMeta({ auth: true })
 
 const trpc = useTRPC()
-const { data: dataUsers, refresh: refreshUsers } = await trpc.users.list.useQuery()
-const { data: dataFiles, refresh: refreshFiles } = await trpc.files.list.useQuery()
+
+const [
+  { data: dataUsers, refresh: refreshUsers, error: errorUsers },
+  { data: dataFiles, refresh: refreshFiles, error: errorFiles },
+] = await Promise.all([
+  trpc.users.list.useQuery(),
+  trpc.files.list.useQuery(),
+])
+
+if (errorUsers.value) {
+  throw createError({
+    statusCode: errorUsers.value.data?.httpStatus,
+    statusMessage: errorUsers.value.message,
+  })
+}
+
+if (errorFiles.value) {
+  throw createError({
+    statusCode: errorFiles.value.data?.httpStatus,
+    statusMessage: errorFiles.value.message,
+  })
+}
 
 const onSubmitFile = async (e: File) => {
   const data = new FormData()
@@ -32,8 +52,9 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
 </script>
 
 <template>
-  <UContainer class="p-8">
-    <div class="flex flex-col gap-8">
+  <div class="flex flex-col gap-4">
+    <NavHeader />
+    <UContainer class="flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-4">
         <UCard class="flex flex-col gap-4">
           <template #header>
@@ -88,7 +109,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
               await refreshFiles()
             }"
             @download-file="async (e) => {
-              console.debug('Downloading file:', e)
+
             }"
             @delete-file="async (e) => {
               await trpc.files.delete.mutate({ key: e.key })
@@ -116,6 +137,6 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
           />
         </div>
       </UCard>
-    </div>
-  </UContainer>
+    </UContainer>
+  </div>
 </template>

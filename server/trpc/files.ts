@@ -1,7 +1,7 @@
 import * as z from 'zod'
-import type { TRPCContext } from '~~/server/trpc/init'
-import { createTRPCRouter, protectedProcedure } from '~~/server/trpc/init'
 import { onFileUpload } from '../tasks/onFileUpload'
+import type { TRPCContext } from '../utils/trpc'
+import { createTRPCRouter, protectedProcedure } from '../utils/trpc'
 
 export const filesRouter = createTRPCRouter({
   create: protectedProcedure
@@ -17,15 +17,14 @@ export const filesRouter = createTRPCRouter({
             .refine(f => f.name.trim().length > 0),
         })))
     .mutation(async ({ input, ctx }) => {
-      console.info(`[tRPC] Creating file: ${input.file.name}`)
       await ctx.storage.put(input.file.name, input.file)
+
       ctx.event.waitUntil(onFileUpload(input.file.name, ctx as TRPCContext))
     }),
 
   delete: protectedProcedure
     .input(z.object({ key: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      console.info(`[tRPC] Deleting file: ${input.key}`)
       await Promise.all([
         ctx.storage.del(input.key),
         ctx.vector.del(input.key),
@@ -35,10 +34,12 @@ export const filesRouter = createTRPCRouter({
   list: protectedProcedure
     .query(async ({ ctx }) => {
       const items = await ctx.storage.list()
-      console.info(`[tRPC] Listing files: ${items.length} items`)
-      return await Promise.all(items.map(async item => ({
+
+      const result = await Promise.all(items.map(async item => ({
         ...item,
         url: await ctx.storage.presign(item.key),
       })))
+
+      return result
     }),
 })

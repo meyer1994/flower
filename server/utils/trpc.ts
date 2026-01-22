@@ -1,31 +1,32 @@
 import { initTRPC, TRPCError, type AnyRouter } from '@trpc/server'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import type { BetterAuthClientOptions, InferSessionFromClient, InferUserFromClient } from 'better-auth'
 import type { H3Event } from 'h3'
-import type { serverAuth } from '../auth/auth'
-import type * as schema from '../db/schema'
-import type { FileStorage } from '../utils/storage'
-import type { VectorStorage } from '../utils/vector'
+import { serverStorage } from '../utils/storage'
+import { serverVector } from '../utils/vector'
+import { serverAuth } from './auth'
+import { serverDrizzle } from './drizzle'
 
 export type TRPCContext = {
-  db: DrizzleD1Database<typeof schema>
-  storage: FileStorage
-  vector: VectorStorage
   event: H3Event
+  db: ReturnType<typeof serverDrizzle>
+  storage: ReturnType<typeof serverStorage>
+  vector: ReturnType<typeof serverVector>
   auth: ReturnType<typeof serverAuth>
-  user: typeof schema.user.$inferSelect | null | undefined
-  session: typeof schema.session.$inferSelect | null | undefined
+  user: InferUserFromClient<BetterAuthClientOptions> | null
+  session: InferSessionFromClient<BetterAuthClientOptions> | null
 }
 
 export const createTRPCContext = async (event: H3Event) => {
   /**
   * @see: https://trpc.io/docs/server/context
   */
+
   return {
     event,
-    db: event.context.db,
-    storage: event.context.storage,
-    vector: event.context.vector,
-    auth: event.context.auth,
+    db: serverDrizzle(event),
+    storage: serverStorage(event),
+    vector: serverVector(event),
+    auth: serverAuth(event),
     user: null,
     session: null,
   } satisfies TRPCContext
@@ -40,24 +41,40 @@ const t = initTRPC.context<TRPCContext>().create({
   // transformer: superjson,
 })
 
+const logger = t.middleware(async ({ next, ctx }) => {
+  const path = ctx.event.path.split('?')[0]
+  console.info(`[TRPC] start ${path}`)
+  const start = Date.now()
+
+  const result = await next({ ctx })
+
+  const duration = Date.now() - start
+  console.info(`[TRPC] end ${path} - ${duration}ms`)
+  return result
+})
+
 const isAuthenticated = t.middleware(async ({ next, ctx }) => {
   const session = await ctx.auth.api.getSession({ headers: ctx.event.headers })
   if (!session) throw new TRPCError({ code: 'UNAUTHORIZED' })
   if (!session.user) throw new TRPCError({ code: 'UNAUTHORIZED' })
+
+  const path = ctx.event.path.split('?')[0]
+  console.info(`[TRPC] isAuthenticated ${path}`)
+
   return next({ ctx: { ...ctx, user: session.user, session: session.session } })
 })
 
 // Base router and procedure helpers
 export const createTRPCRouter = t.router
 export const createCallerFactory = t.createCallerFactory
-export const baseProcedure = t.procedure
-export const protectedProcedure = t.procedure.use(isAuthenticated)
+export const baseProcedure = t.procedure.use(logger)
+export const protectedProcedure = t.procedure.use(logger).use(isAuthenticated)
 
 /**
  * Creates an internal tRPC caller for SSR to bypass HTTP subrequests.
  * @see https://trpc.io/docs/server/server-side-calls
  */
-export const createInternalCaller = async <TRouter extends AnyRouter>(
+export const serverTRPC = async <TRouter extends AnyRouter>(
   router: TRouter,
   event: H3Event,
 ) => {

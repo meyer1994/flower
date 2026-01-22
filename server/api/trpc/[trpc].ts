@@ -1,6 +1,6 @@
 import { createTRPCNuxtHandler } from 'trpc-nuxt/server'
-import { appRouter } from '~~/server/trpc'
-import { createTRPCContext } from '~~/server/trpc/init'
+import { appRouter } from '../../trpc'
+import { createTRPCContext } from '../../utils/trpc'
 
 export default createTRPCNuxtHandler({
   endpoint: '/api/trpc',

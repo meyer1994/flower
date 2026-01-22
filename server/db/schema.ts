@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
-export * from '../auth/schema'
+export * from './auth'
 
 export const TUsers = sqliteTable('users', {
   id: text('id')

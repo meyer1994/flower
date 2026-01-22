@@ -11,7 +11,7 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 const toast = useToast()
-const auth = useAuth()
+const { signIn, loggedIn } = useAuth()
 
 const fields: AuthFormField[] = [
   {
@@ -49,30 +49,14 @@ const providers = [
     },
   },
 ]
-
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  await auth.signIn.email({
-    email: event.data.email,
-    password: event.data.password,
-    rememberMe: event.data.remember,
-  })
-  await navigateTo('/')
-}
 </script>
 
 <template>
-  <div>
-    <UHeader>
-      <template #left>
-        <UButton
-          icon="i-lucide-arrow-left"
-          to="/"
-        />
-      </template>
-    </UHeader>
+  <div class="flex flex-col gap-4">
+    <NavHeader />
 
-    <div class="flex flex-col items-center justify-center gap-4 p-4">
-      <UPageCard class="w-full max-w-md">
+    <UContainer>
+      <UPageCard v-if="!loggedIn">
         <UAuthForm
           :schema="schema"
           title="Sign in"
@@ -80,9 +64,16 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           icon="i-lucide-user"
           :fields="fields"
           :providers="providers"
-          @submit="onSubmit"
+          @submit="async (e: FormSubmitEvent<Schema>) => {
+            await signIn.email({
+              email: e.data.email,
+              password: e.data.password,
+              rememberMe: e.data.remember,
+            })
+            await navigateTo('/')
+          }"
         />
       </UPageCard>
-    </div>
+    </UContainer>
   </div>
 </template>

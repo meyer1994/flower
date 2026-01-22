@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createTRPCRouter, protectedProcedure } from './init'
+import { createTRPCRouter, protectedProcedure } from '../utils/trpc'
 
 export const vectorRouter = createTRPCRouter({
   search: protectedProcedure
@@ -8,9 +8,10 @@ export const vectorRouter = createTRPCRouter({
       prefix: z.string().optional(),
     }))
     .query(async ({ input, ctx }) => {
-      console.info(`[tRPC] Vector search: "${input.query}" (prefix: ${input.prefix ?? 'none'})`)
-      return await ctx.vector.search(input.query, {
+      const results = await ctx.vector.search(input.query, {
         prefix: input.prefix ?? undefined,
       })
+
+      return results
     }),
 })

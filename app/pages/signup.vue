@@ -10,7 +10,7 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 const toast = useToast()
-const auth = useAuth()
+const { signUp, loggedIn } = useAuth()
 
 const fields: AuthFormField[] = [
   {
@@ -43,30 +43,14 @@ const providers = [
     },
   },
 ]
-
-async function onSubmit(e: FormSubmitEvent<Schema>) {
-  await auth.signUp.email({
-    email: e.data.email,
-    name: e.data.email,
-    password: e.data.password,
-  })
-  await reloadNuxtApp({ path: '/' })
-}
 </script>
 
 <template>
-  <div>
-    <UHeader>
-      <template #left>
-        <UButton
-          icon="i-lucide-arrow-left"
-          to="/"
-        />
-      </template>
-    </UHeader>
+  <div class="flex flex-col gap-4">
+    <NavHeader />
 
-    <div class="flex flex-col items-center justify-center gap-4 p-4">
-      <UPageCard>
+    <UContainer>
+      <UPageCard v-if="!loggedIn">
         <UAuthForm
           :schema="schema"
           title="Sign up"
@@ -74,9 +58,16 @@ async function onSubmit(e: FormSubmitEvent<Schema>) {
           icon="i-lucide-user"
           :fields="fields"
           :providers="providers"
-          @submit="onSubmit"
+          @submit="async (e: FormSubmitEvent<Schema>) => {
+            await signUp.email({
+              email: e.data.email,
+              name: e.data.email,
+              password: e.data.password,
+            })
+            return await reloadNuxtApp({ path: '/' })
+          }"
         />
       </UPageCard>
-    </div>
+    </UContainer>
   </div>
 </template>

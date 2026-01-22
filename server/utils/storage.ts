@@ -8,6 +8,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import type { H3Event } from 'h3'
 
 export type FileStorageItem = {
   key: string
@@ -86,14 +87,12 @@ export class S3Storage implements FileStorage {
     const command = new GetObjectCommand({ Bucket: this.bucket, Key: key })
     const response = await this.client.send(command)
     if (!response.Body) {
-      console.error(`Error getting object ${key}:`, response)
       throw new Error(`Object ${key} not found`)
     }
     return response.Body.transformToWebStream()
   }
 
   async put(key: string, file: File): Promise<void> {
-    console.debug(`[Storage] Uploading: ${key}`)
     const upload = new Upload({
       client: this.client,
       params: {
@@ -104,11 +103,9 @@ export class S3Storage implements FileStorage {
       },
     })
     await upload.done()
-    console.debug(`[Storage] Uploaded: ${key}`)
   }
 
   async del(key: string): Promise<void> {
-    console.debug(`[Storage] Deleting: ${key}`)
     const command = new DeleteObjectCommand({ Bucket: this.bucket, Key: key })
     await this.client.send(command)
   }
@@ -166,15 +163,34 @@ export class S3Storage implements FileStorage {
   }
 }
 
+type R2StorageOptions = {
+  bucket: R2Bucket
+  bucketName: string
+  region: string
+  accessKeyId: string
+  secretAccessKey: string
+  endpointUrl: string
+}
+
 export class R2Storage implements FileStorage {
   private bucket: R2Bucket
-  private client: S3Client
-  private bucketName: string
+  private options: R2StorageOptions
 
-  constructor(bucket: R2Bucket, bucketName: string) {
-    this.bucket = bucket
-    this.bucketName = bucketName
-    this.client = new S3Client({ forcePathStyle: true })
+  private client: S3Client
+
+  constructor(env: Env, options: R2StorageOptions) {
+    this.bucket = env.BUCKET
+    this.options = options
+
+    this.client = new S3Client({
+      region: this.options.region,
+      credentials: {
+        accessKeyId: this.options.accessKeyId,
+        secretAccessKey: this.options.secretAccessKey,
+      },
+      endpoint: this.options.endpointUrl,
+      forcePathStyle: true,
+    })
   }
 
   async get(key: string): Promise<ReadableStream<Uint8Array>> {
@@ -184,15 +200,12 @@ export class R2Storage implements FileStorage {
   }
 
   async put(key: string, file: File): Promise<void> {
-    console.debug(`[Storage] Uploading: ${key}`)
     await this.bucket.put(key, file, {
       httpMetadata: { contentType: file.type },
     })
-    console.debug(`[Storage] Uploaded: ${key}`)
   }
 
   async del(key: string): Promise<void> {
-    console.debug(`[Storage] Deleting: ${key}`)
     await this.bucket.delete(key)
   }
 
@@ -212,7 +225,7 @@ export class R2Storage implements FileStorage {
   }
 
   async presign(key: string): Promise<string> {
-    const command = new GetObjectCommand({ Bucket: this.bucketName, Key: key })
+    const command = new GetObjectCommand({ Bucket: this.options.bucketName, Key: key })
     return await getSignedUrl(this.client, command, { expiresIn: 3600 })
   }
 
@@ -245,4 +258,24 @@ export class R2Storage implements FileStorage {
 
     return files
   }
+}
+
+export const serverStorage = (event: H3Event): FileStorage => {
+  const env = event.context.cloudflare.env as unknown as Env
+
+  if (!env.BUCKET) throw new Error('BUCKET not found')
+  if (!env.NUXT_AWS_BUCKET) throw new Error('NUXT_AWS_BUCKET not found')
+  if (!env.AWS_ACCESS_KEY_ID) throw new Error('AWS_ACCESS_KEY_ID not found')
+  if (!env.AWS_SECRET_ACCESS_KEY) throw new Error('AWS_SECRET_ACCESS_KEY not found')
+  if (!env.AWS_ENDPOINT_URL_S3) throw new Error('AWS_ENDPOINT_URL_S3 not found')
+  if (!env.AWS_REGION) throw new Error('AWS_REGION not found')
+
+  return new R2Storage(env, {
+    bucket: env.BUCKET,
+    bucketName: env.NUXT_AWS_BUCKET,
+    region: env.AWS_REGION,
+    accessKeyId: env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+    endpointUrl: env.AWS_ENDPOINT_URL_S3,
+  })
 }
