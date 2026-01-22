@@ -36,11 +36,14 @@ export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
   const db = serverDrizzle(event)
 
   return betterAuth({
-    database: drizzleAdapter(db, { provider: 'sqlite' }),
+    database: drizzleAdapter(db, {
+      provider: 'sqlite',
+      debugLogs: true,
+    }),
 
     logger: {
       level: 'debug',
-      disabled: !import.meta.dev,
+      disabled: false,
       log: (level, message, ...args) => {
         console.info(`[server.auth] ${level} ${message}`, ...args)
       },
@@ -51,11 +54,11 @@ export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
       requireEmailVerification: false,
     },
 
-    session: {
-      cookieCache: {
-        enabled: false,
-      },
-    },
+    // session: {
+    //   cookieCache: {
+    //     enabled: false,
+    //   },
+    // },
 
     // session: {
     //   cookieCache: {
@@ -79,6 +82,6 @@ export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
       'https://*.meyer1994.workers.dev',
     ],
 
-    secondaryStorage: serverAuthSecondaryStorage(event),
+    // secondaryStorage: serverAuthSecondaryStorage(event),
   })
 }
