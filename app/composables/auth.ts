@@ -7,7 +7,7 @@ import { createAuthClient } from 'better-auth/vue'
 
 export function useAuth() {
   const url = useRequestURL()
-  const headers = import.meta.server ? useRequestHeaders() : undefined
+  const headers = useRequestHeaders()
 
   const client = createAuthClient({
     baseURL: url.origin,
@@ -16,29 +16,23 @@ export function useAuth() {
 
   type User = InferUserFromClient<ClientOptions>
   type Session = InferSessionFromClient<ClientOptions>
+  type Data = { user: User, session: Session }
 
-  const user = useState<User | null>('auth:user', () => null)
-  const session = useState<Session | null>('auth:session', () => null)
+  const sessionUrl = new URL('/api/auth/get-session', url.origin)
+  console.info('[client.auth] sessionUrl', sessionUrl.href)
 
-  const isFetching = import.meta.server ? ref(false) : useState('auth:sessionFetching', () => false)
+  const { data: session, status, refresh } = useFetch<Data>(sessionUrl.href, {
+    headers,
+  })
+
+  const isFetching = computed(() => status.value === 'pending')
+  const user = computed(() => session.value?.user || null)
+  const loggedIn = computed(() => !!session.value)
 
   const fetchSession = async () => {
     if (isFetching.value) return
-
-    isFetching.value = true
-    try {
-      const { data } = await client.getSession()
-      session.value = data?.session || null
-      user.value = data?.user || null
-      return data
-    }
-    catch (error) {
-      console.error('[Auth] fetchSession error', error)
-      throw error
-    }
-    finally {
-      isFetching.value = false
-    }
+    await refresh()
+    return session.value
   }
 
   if (import.meta.client) {
@@ -51,7 +45,7 @@ export function useAuth() {
   return {
     session,
     user,
-    loggedIn: computed(() => !!session.value),
+    loggedIn,
     signIn: client.signIn,
     signOut: client.signOut,
     signUp: client.signUp,

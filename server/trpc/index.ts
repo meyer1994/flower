@@ -2,7 +2,7 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { filesRouter } from '~~/server/trpc/files'
 import { usersRouter } from '~~/server/trpc/users'
 import { vectorRouter } from '~~/server/trpc/vector'
-import { baseProcedure, createTRPCRouter } from '../utils/trpc'
+import { baseProcedure, createTRPCRouter } from '../lib/trpc'
 
 export const appRouter = createTRPCRouter({
   ping: baseProcedure

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createTRPCRouter, protectedProcedure } from '../utils/trpc'
+import { createTRPCRouter, protectedProcedure } from '../lib/trpc'
 
 export const vectorRouter = createTRPCRouter({
   search: protectedProcedure

@@ -1,4 +1,4 @@
-import type { TRPCContext } from '../utils/trpc'
+import type { TRPCContext } from '../lib/trpc'
 
 export const onFileUpload = async (key: string, ctx: TRPCContext) => {
   try {

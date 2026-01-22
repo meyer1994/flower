@@ -9,17 +9,25 @@ const serverAuthSecondaryStorage = (event: H3Event): SecondaryStorage => {
 
   return {
     get: async (key: string) => {
+      console.info('[server.auth.cache] get', key)
       const value = await kv.get(key)
-
+      console.info('[server.auth.cache] get result', key, value ? 'HIT' : 'MISS')
       return value
     },
     set: async (key: string, value: string, ttl?: number) => {
-      if (!ttl) return await kv.put(key, value)
-      const timetolive = Math.max(ttl, 60)
-      return await kv.put(key, value, { expirationTtl: timetolive })
+      console.info('[server.auth.cache] set', key, { ttl })
+      if (!ttl) {
+        await kv.put(key, value)
+        console.info('[server.auth.cache] set completed', key, 'no TTL')
+        return
+      }
+      await kv.put(key, value, { expirationTtl: Math.max(ttl ?? 0, 60) })
+      console.info('[server.auth.cache] set completed', key, 'with TTL', ttl)
     },
     delete: async (key: string) => {
-      return await kv.delete(key)
+      console.info('[server.auth.cache] delete', key)
+      await kv.delete(key)
+      console.info('[server.auth.cache] delete completed', key)
     },
   }
 }
@@ -31,16 +39,22 @@ export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
     database: drizzleAdapter(db, { provider: 'sqlite' }),
 
     logger: {
-      level: 'info',
-      enabled: true,
+      level: 'debug',
+      disabled: !import.meta.dev,
       log: (level, message, ...args) => {
-        console.info(`[BetterAuth] ${level} ${message}`, ...args)
+        console.info(`[server.auth] ${level} ${message}`, ...args)
       },
     },
 
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+    },
+
+    session: {
+      cookieCache: {
+        enabled: false,
+      },
     },
 
     // session: {

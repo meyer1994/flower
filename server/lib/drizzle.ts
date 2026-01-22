@@ -10,7 +10,7 @@ export const serverDrizzle = (event: H3Event) => {
     logger: {
       logQuery: (query, params) => {
         if (!import.meta.dev) return
-        console.info(`[Drizzle] query ${query} with params ${params}`)
+        console.info(`[server.drizzle] query ${query} with params ${params}`)
       },
     },
   })

@@ -3,34 +3,32 @@ import type { AppRouterOutputs } from '~~/server/trpc'
 
 definePageMeta({ auth: true })
 
-const trpc = useTRPC()
+const { $trpc } = useNuxtApp()
 
 const [
   { data: dataUsers, refresh: refreshUsers, error: errorUsers },
   { data: dataFiles, refresh: refreshFiles, error: errorFiles },
 ] = await Promise.all([
-  trpc.users.list.useQuery(),
-  trpc.files.list.useQuery(),
+  $trpc.users.list.useQuery(undefined),
+  $trpc.files.list.useQuery(undefined),
 ])
+console.warn('[demo] errorUsers', errorUsers.value)
+console.warn('[demo] errorFiles', errorFiles.value)
 
-if (errorUsers.value) {
-  throw createError({
-    statusCode: errorUsers.value.data?.httpStatus,
-    statusMessage: errorUsers.value.message,
-  })
-}
+// if (errorUsers.value) throw createError({
+//   statusCode: errorUsers.value.data?.httpStatus,
+//   statusMessage: JSON.stringify(errorUsers.value.data),
+// })
 
-if (errorFiles.value) {
-  throw createError({
-    statusCode: errorFiles.value.data?.httpStatus,
-    statusMessage: errorFiles.value.message,
-  })
-}
+// if (errorFiles.value) throw createError({
+//   statusCode: errorFiles.value.data?.httpStatus,
+//   statusMessage: JSON.stringify(errorFiles.value.data),
+// })
 
 const onSubmitFile = async (e: File) => {
   const data = new FormData()
   data.append('file', e)
-  await trpc.files.create.mutate(data)
+  await $trpc.files.create.mutate(data)
   await refreshFiles()
 }
 
@@ -42,7 +40,7 @@ const isSearching = ref(false)
 const onSearch = async (e: { query: string, prefix?: string }) => {
   isSearching.value = true
   try {
-    const results = await trpc.vector.search.query(e)
+    const results = await $trpc.vector.search.query(e)
     searchResults.value = results
   }
   finally {
@@ -65,7 +63,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
 
           <FormUser
             @submit="async (e) => {
-              await trpc.users.create.mutate(e)
+              await $trpc.users.create.mutate(e)
               await refreshUsers()
             }"
           />
@@ -76,15 +74,15 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
               await refreshUsers()
             }"
             @update-user="async (e) => {
-              await trpc.users.update.mutate(e)
+              await $trpc.users.update.mutate(e)
               await refreshUsers()
             }"
             @delete-user="async (e) => {
-              await trpc.users.delete.mutate(e)
+              await $trpc.users.delete.mutate(e)
               await refreshUsers()
             }"
             @select-user="async (e) => {
-              await trpc.users.update.mutate(e)
+              await $trpc.users.update.mutate(e)
               await refreshUsers()
             }"
           />
@@ -112,7 +110,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
 
             }"
             @delete-file="async (e) => {
-              await trpc.files.delete.mutate({ key: e.key })
+              await $trpc.files.delete.mutate({ key: e.key })
               await refreshFiles()
             }"
           />

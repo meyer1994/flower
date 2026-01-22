@@ -1,10 +1,15 @@
-import { initTRPC, TRPCError, type AnyRouter } from '@trpc/server'
+import { initTRPC, type AnyRouter } from '@trpc/server'
 import type { BetterAuthClientOptions, InferSessionFromClient, InferUserFromClient } from 'better-auth'
 import type { H3Event } from 'h3'
-import { serverStorage } from '../utils/storage'
-import { serverVector } from '../utils/vector'
 import { serverAuth } from './auth'
 import { serverDrizzle } from './drizzle'
+import { serverStorage } from './storage'
+import { serverVector } from './vector'
+
+type Session = {
+  user: InferUserFromClient<BetterAuthClientOptions>
+  session: InferSessionFromClient<BetterAuthClientOptions>
+}
 
 export type TRPCContext = {
   event: H3Event
@@ -12,8 +17,7 @@ export type TRPCContext = {
   storage: ReturnType<typeof serverStorage>
   vector: ReturnType<typeof serverVector>
   auth: ReturnType<typeof serverAuth>
-  user: InferUserFromClient<BetterAuthClientOptions> | null
-  session: InferSessionFromClient<BetterAuthClientOptions> | null
+  session: Session | null
 }
 
 export const createTRPCContext = async (event: H3Event) => {
@@ -21,14 +25,20 @@ export const createTRPCContext = async (event: H3Event) => {
   * @see: https://trpc.io/docs/server/context
   */
 
+  const auth = serverAuth(event)
+  const db = serverDrizzle(event)
+  const storage = serverStorage(event)
+  const vector = serverVector(event)
+  const session = await auth.api.getSession({ headers: event.headers })
+  console.info('[server.trpc] session', session)
+
   return {
     event,
-    db: serverDrizzle(event),
-    storage: serverStorage(event),
-    vector: serverVector(event),
-    auth: serverAuth(event),
-    user: null,
-    session: null,
+    db,
+    storage,
+    vector,
+    auth,
+    session,
   } satisfies TRPCContext
 }
 
@@ -43,25 +53,24 @@ const t = initTRPC.context<TRPCContext>().create({
 
 const logger = t.middleware(async ({ next, ctx }) => {
   const path = ctx.event.path.split('?')[0]
-  console.info(`[TRPC] start ${path}`)
+  console.info(`[server.trpc] start ${path}`)
   const start = Date.now()
 
   const result = await next({ ctx })
 
   const duration = Date.now() - start
-  console.info(`[TRPC] end ${path} - ${duration}ms`)
+  console.info(`[server.trpc] end ${path} - ${duration}ms`)
   return result
 })
 
 const isAuthenticated = t.middleware(async ({ next, ctx }) => {
-  const session = await ctx.auth.api.getSession({ headers: ctx.event.headers })
-  if (!session) throw new TRPCError({ code: 'UNAUTHORIZED' })
-  if (!session.user) throw new TRPCError({ code: 'UNAUTHORIZED' })
+  if (!ctx.session) throw createError({ statusCode: 401, statusMessage: 'No session found' })
+  if (!ctx.session.user) throw createError({ statusCode: 401, statusMessage: 'No user found in session' })
 
   const path = ctx.event.path.split('?')[0]
-  console.info(`[TRPC] isAuthenticated ${path}`)
+  console.info(`[server.trpc] user ${ctx.session.user.id} authenticated for ${path}`)
 
-  return next({ ctx: { ...ctx, user: session.user, session: session.session } })
+  return next({ ctx })
 })
 
 // Base router and procedure helpers

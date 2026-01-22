@@ -1,7 +1,7 @@
 import * as z from 'zod'
+import type { TRPCContext } from '../lib/trpc'
+import { createTRPCRouter, protectedProcedure } from '../lib/trpc'
 import { onFileUpload } from '../tasks/onFileUpload'
-import type { TRPCContext } from '../utils/trpc'
-import { createTRPCRouter, protectedProcedure } from '../utils/trpc'
 
 export const filesRouter = createTRPCRouter({
   create: protectedProcedure

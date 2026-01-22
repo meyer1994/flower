@@ -1,7 +1,7 @@
 import { desc, eq } from 'drizzle-orm'
 import * as z from 'zod'
 import { TUsers } from '~~/server/db/schema'
-import { createTRPCRouter, protectedProcedure } from '../utils/trpc'
+import { createTRPCRouter, protectedProcedure } from '../lib/trpc'
 
 export const usersRouter = createTRPCRouter({
   create: protectedProcedure
