@@ -30,7 +30,8 @@ export const createTRPCContext = async (event: H3Event) => {
   const storage = serverStorage(event)
   const vector = serverVector(event)
   const session = await auth.api.getSession({ headers: event.headers })
-  console.info('[server.trpc] session', session)
+  console.info('[server.trpc] user id', session?.user?.id)
+  console.info('[server.trpc] session id', session?.session?.id)
 
   return {
     event,

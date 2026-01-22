@@ -10,12 +10,19 @@ declare module 'vue-router' {
   }
 }
 
-export default defineNuxtRouteMiddleware(async (to) => {
-  if (import.meta.server) return // do not validate on server
-  if (!to.meta.auth) return // do not validate if no auth meta is set1
+export default defineNuxtRouteMiddleware(async (to, from) => {
+  if (import.meta.client) {
+    console.info(`[client.middleware.auth.global] from ${from.path} to ${to.path}`)
+  }
+  if (import.meta.server) {
+    console.info(`[server.middleware.auth.global] from ${from.path} to ${to.path}`)
+  }
 
   const { loggedIn, fetchSession } = useAuth()
-  if (import.meta.client) await fetchSession()
+  await fetchSession()
 
+  // skip if noth protected route
+  if (!to.meta.auth) return
+  // abort if not logged in (404)
   if (!loggedIn.value) return abortNavigation()
 })

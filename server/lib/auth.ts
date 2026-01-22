@@ -38,43 +38,19 @@ export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
   return betterAuth({
     database: drizzleAdapter(db, {
       provider: 'sqlite',
-      debugLogs: true,
+      // debugLogs: true,
     }),
 
-    logger: {
-      level: 'debug',
-      disabled: false,
-      log: (level, message, ...args) => {
-        console.info(`[server.auth] ${level} ${message}`, ...args)
-      },
-    },
+    // logger: {
+    //   level: 'debug',
+    //   disabled: false,
+    //   disableColors: !import.meta.dev,
+    // },
 
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
     },
-
-    // session: {
-    //   cookieCache: {
-    //     enabled: false,
-    //   },
-    // },
-
-    // session: {
-    //   cookieCache: {
-    //     enabled: true,
-    //     maxAge: 300, // 5 minutes cache duration
-    //     strategy: 'jwe', // can be "jwt" or "compact"
-    //     refreshCache: true, // Enable stateless refresh
-    //   },
-    // },
-
-    // account: {
-    //   storeStateStrategy: 'cookie',
-    //   // Store account data after OAuth flow in a cookie (useful for
-    //   // database-less flows)
-    //   storeAccountCookie: true,
-    // },
 
     trustedOrigins: [
       'http://localhost:3000',

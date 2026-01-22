@@ -1,8 +1,3 @@
-import type {
-  BetterAuthClientOptions as ClientOptions,
-  InferSessionFromClient,
-  InferUserFromClient,
-} from 'better-auth/client'
 import { createAuthClient } from 'better-auth/vue'
 
 export function useAuth() {
@@ -14,42 +9,35 @@ export function useAuth() {
     fetchOptions: { headers },
   })
 
-  type User = InferUserFromClient<ClientOptions>
-  type Session = InferSessionFromClient<ClientOptions>
-  type Data = { user: User, session: Session }
+  const { data, refresh } = useAsyncData('session', async () => {
+    console.info('[client.auth] fetching session')
+    const session = await client.getSession()
+    return session.data
+  }, { server: false })
 
-  const sessionUrl = new URL('/api/auth/get-session', url.origin)
-  console.info('[client.auth] sessionUrl', sessionUrl.href)
-
-  const { data: session, status, refresh } = useFetch<Data>(sessionUrl.href, {
-    headers,
-  })
-
-  const isFetching = computed(() => status.value === 'pending')
-  const user = computed(() => session.value?.user || null)
-  const loggedIn = computed(() => !!session.value)
+  const user = computed(() => data.value?.user || null)
+  const session = computed(() => data.value?.session || null)
+  const loggedIn = computed(() => !!data.value?.user)
 
   const fetchSession = async () => {
-    if (isFetching.value) return
     await refresh()
     return session.value
   }
 
-  if (import.meta.client) {
-    client.$store.listen('$sessionSignal', async (signal) => {
-      if (!signal) return
-      await fetchSession()
-    })
+  const signOut = async () => {
+    await client.signOut()
+    data.value = null
+    await refresh()
   }
 
   return {
-    session,
     user,
+    session,
     loggedIn,
+    client,
     signIn: client.signIn,
-    signOut: client.signOut,
+    signOut,
     signUp: client.signUp,
     fetchSession,
-    client,
   }
 }

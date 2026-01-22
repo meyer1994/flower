@@ -2,7 +2,6 @@
 import type { AppRouterOutputs } from '~~/server/trpc'
 
 definePageMeta({ auth: true })
-
 const { $trpc } = useNuxtApp()
 
 const [
@@ -12,18 +11,16 @@ const [
   $trpc.users.list.useQuery(undefined),
   $trpc.files.list.useQuery(undefined),
 ])
-console.warn('[demo] errorUsers', errorUsers.value)
-console.warn('[demo] errorFiles', errorFiles.value)
 
-// if (errorUsers.value) throw createError({
-//   statusCode: errorUsers.value.data?.httpStatus,
-//   statusMessage: JSON.stringify(errorUsers.value.data),
-// })
+if (errorUsers.value) throw createError({
+  statusCode: errorUsers.value.data?.httpStatus,
+  statusMessage: JSON.stringify(errorUsers.value.data),
+})
 
-// if (errorFiles.value) throw createError({
-//   statusCode: errorFiles.value.data?.httpStatus,
-//   statusMessage: JSON.stringify(errorFiles.value.data),
-// })
+if (errorFiles.value) throw createError({
+  statusCode: errorFiles.value.data?.httpStatus,
+  statusMessage: JSON.stringify(errorFiles.value.data),
+})
 
 const onSubmitFile = async (e: File) => {
   const data = new FormData()
