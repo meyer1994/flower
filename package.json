@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "flower",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,7 +36,6 @@
     "better-auth": "^1.4.17",
     "drizzle-orm": "^0.45.1",
     "nuxt": "^4.3.0",
-    "superjson": "^2.2.6",
     "trpc-nuxt": "^2.0.1",
     "vue": "^3.5.27",
     "vue-router": "^4.6.4",
@@ -48,7 +47,6 @@
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.2",
-    "miniflare": "^4.20260120.0",
     "nitro-cloudflare-dev": "^0.2.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
