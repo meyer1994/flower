@@ -6,6 +6,7 @@ import type { H3Event } from 'h3'
 import * as schema from '../db/schema'
 import { serverDrizzle } from './drizzle'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const serverAuthSecondaryStorage = (event: H3Event): SecondaryStorage => {
   const kv = event.context.cloudflare.env.KV as KVNamespace
 

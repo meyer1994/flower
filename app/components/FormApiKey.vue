@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { SelectItem } from '@nuxt/ui'
 import * as z from 'zod'
 
 const schema = z.object({
@@ -20,13 +21,13 @@ const props = withDefaults(defineProps<Props>(), {
 const state = reactive<Partial<Schema>>(props.defaultValue)
 const emits = defineEmits<{ submit: [e: Schema] }>()
 
-const expirationOptions = [
+const expirationOptions: SelectItem[] = [
   { label: 'Never', value: undefined },
   { label: '7 days', value: 60 * 60 * 24 * 7 },
   { label: '30 days', value: 60 * 60 * 24 * 30 },
   { label: '90 days', value: 60 * 60 * 24 * 90 },
   { label: '1 year', value: 60 * 60 * 24 * 365 },
-] as const
+]
 
 const selectedExpiration = ref<number | undefined>(undefined)
 watch(selectedExpiration, v => state.expiresIn = v ?? undefined)

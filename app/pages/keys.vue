@@ -34,14 +34,14 @@ function onCloseKeyView() {
   key.value = null
 }
 
-function onCloseSlideoverPlayground() {
-  isShowingPlayground.value = false
-  key.value = null
-}
-
 function onSelectKey(e: ApiKey) {
   key.value = e
   isShowingPlayground.value = true
+}
+
+function onClosePlayground() {
+  isShowingPlayground.value = false
+  key.value = null
 }
 </script>
 
@@ -95,6 +95,7 @@ function onSelectKey(e: ApiKey) {
       title="API Key"
       description="View your API key"
       class="md:min-w-2xl"
+      @close="onClosePlayground"
     >
       <template #body>
         <KeyPlayground />
