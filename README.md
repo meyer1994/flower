@@ -64,6 +64,25 @@ If the user is not logged in, they will be redirected to a 404 page. As it is
 currently configured, we refresh the session on every route navigation.
 
 
+### API Keys
+
+Users can create and manage API keys for programmatic access via the `/keys`
+page. Keys are managed through Better Auth's `apiKey` plugin.
+
+To verify an API key in a server route:
+
+```typescript
+const auth = serverAuth(event)
+const apiKey = getHeader(event, 'x-api-key')
+const result = await auth.api.verifyApiKey({ body: { key: apiKey } })
+if (!result.valid) {
+  throw createError({ code: 401, message: 'Unauthorized' })
+}
+```
+
+See `server/api/protected/test.ts` for a full example.
+
+
 ### Database
 
 The database is managed by Drizzle ORM. Migrations are managed via `drizzle-kit`
