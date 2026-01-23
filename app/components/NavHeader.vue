@@ -1,34 +1,23 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
+const route = useRoute()
 const { loggedIn, signOut } = useAuth()
 
-const route = useRoute()
-const getOpen = (i: NavigationMenuItem) => i.to === route.path
-
-const items = computed(() => {
+const items = computed<NavigationMenuItem[]>(() => {
   if (loggedIn.value) {
     return [
       {
         to: '/demo',
         label: 'Demo',
         icon: 'i-lucide-play',
-        open: getOpen({ to: '/demo' }),
+        open: route.path.startsWith('/demo'),
       },
       {
         to: '/profile',
         label: 'Profile',
         icon: 'i-lucide-user',
-        open: getOpen({ to: '/profile' }),
-      },
-      {
-        onClick: async () => {
-          await signOut()
-          await reloadNuxtApp({ path: '/' })
-        },
-        label: 'Sign Out',
-        icon: 'i-lucide-log-out',
-        open: getOpen({ to: '/signout' }),
+        open: route.path.startsWith('/profile'),
       },
     ]
   }
@@ -38,13 +27,13 @@ const items = computed(() => {
       to: '/signin',
       label: 'Sign In',
       icon: 'i-lucide-log-in',
-      open: getOpen({ to: '/signin' }),
+      open: route.path.startsWith('/signin'),
     },
     {
       to: '/signup',
       label: 'Sign Up',
       icon: 'i-lucide-user-plus',
-      open: getOpen({ to: '/signup' }),
+      open: route.path.startsWith('/signup'),
     },
   ]
 })
@@ -52,8 +41,39 @@ const items = computed(() => {
 
 <template>
   <UHeader>
+    <template #title>
+      <UButton
+        label="flower"
+        variant="ghost"
+        class="text-2xl font-bold"
+        icon="i-lucide-flower"
+        @click="async () => { await navigateTo('/') }"
+      />
+    </template>
+
+    <UNavigationMenu :items="items" />
+
     <template #right>
-      <UNavigationMenu :items="items" />
+      <UColorModeButton title="Toggle Color Mode" />
+      <template v-if="loggedIn">
+        <UButton
+          icon="i-lucide-log-out"
+          title="Sign Out"
+          variant="ghost"
+          color="neutral"
+          @click="async () => {
+            await signOut();
+            await reloadNuxtApp({ path: '/' })
+          }"
+        />
+      </template>
+    </template>
+
+    <template #body>
+      <UNavigationMenu
+        :items="items"
+        orientation="vertical"
+      />
     </template>
   </UHeader>
 </template>

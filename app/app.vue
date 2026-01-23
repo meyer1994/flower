@@ -1,7 +1,7 @@
 <script setup lang="ts">
 useHead({
-  title: 'Flower',
-  titleTemplate: '%s - Flower',
+  title: 'flower',
+  titleTemplate: '%s',
   meta: [
     {
       name: 'description',
@@ -12,9 +12,9 @@ useHead({
 </script>
 
 <template>
-  <NuxtRouteAnnouncer />
-  <NuxtLoadingIndicator />
   <UApp>
+    <NuxtRouteAnnouncer />
+    <NuxtLoadingIndicator />
     <NuxtPage />
   </UApp>
 </template>

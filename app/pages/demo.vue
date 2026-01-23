@@ -51,7 +51,7 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
   <div class="flex flex-col gap-4">
     <NavHeader />
     <UContainer class="flex flex-col gap-4">
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <UCard class="flex flex-col gap-4">
           <template #header>
             <h2 class="text-2xl font-bold">
