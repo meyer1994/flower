@@ -2,7 +2,7 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { drizzle } from 'drizzle-orm/sql-js'
 import * as schema from './server/db/schema'
-
+import { DEFAULT_OPTIONS } from './server/lib/auth'
 import { globSync } from 'node:fs'
 import * as pathLib from 'node:path'
 
@@ -17,24 +17,5 @@ export const auth = betterAuth({
     schema,
   }),
 
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
-
-  // advanced: {
-  //   useSecureCookies: true,
-  // },
-
-  session: {
-    cookieCache: {
-      enabled: false,
-    },
-  },
-
-  trustedOrigins: [
-    'http://localhost:3000',
-    'http://localhost:8787',
-    'https://*.meyer1994.workers.dev',
-  ],
+  ...DEFAULT_OPTIONS,
 })

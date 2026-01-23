@@ -13,7 +13,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "db:generate:auth": "dotenv -e .env -- pnpx @better-auth/cli generate --config auth.config.ts --output server/db/auth.ts -y && eslint --fix server/db/auth.ts",
+    "db:generate:auth": "pnpm better-auth generate --config auth.config.ts --output server/db/auth.ts -y && eslint --fix server/db/auth.ts",
     "db:generate": "pnpm run db:generate:auth && dotenv -e .env drizzle-kit generate",
     "db:migrate": "pnpm run cf:migrate",
     "cf:deploy": "pnpm run build && wrangler --cwd .output deploy",
@@ -42,6 +42,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@better-auth/cli": "^1.4.17",
     "@iconify-json/lucide": "^1.2.86",
     "@types/node": "^25.0.10",
     "dotenv-cli": "^11.0.0",

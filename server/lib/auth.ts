@@ -1,7 +1,9 @@
-import type { SecondaryStorage } from 'better-auth'
+import type { BetterAuthOptions, SecondaryStorage } from 'better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { apiKey } from 'better-auth/plugins'
 import type { H3Event } from 'h3'
+import * as schema from '../db/schema'
 import { serverDrizzle } from './drizzle'
 
 const serverAuthSecondaryStorage = (event: H3Event): SecondaryStorage => {
@@ -32,6 +34,31 @@ const serverAuthSecondaryStorage = (event: H3Event): SecondaryStorage => {
   }
 }
 
+export const DEFAULT_OPTIONS: BetterAuthOptions = {
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: false,
+  },
+
+  // logger: {
+  //   level: 'debug',
+  //   disabled: false,
+  //   disableColors: !import.meta.dev,
+  // },
+
+  trustedOrigins: [
+    'http://localhost:3000',
+    'http://localhost:8787',
+    'https://*.meyer1994.workers.dev',
+  ],
+
+  // secondaryStorage: serverAuthSecondaryStorage(event),
+
+  plugins: [
+    apiKey(),
+  ],
+}
+
 export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
   const db = serverDrizzle(event)
 
@@ -39,25 +66,8 @@ export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
     database: drizzleAdapter(db, {
       provider: 'sqlite',
       // debugLogs: true,
+      schema,
     }),
-
-    // logger: {
-    //   level: 'debug',
-    //   disabled: false,
-    //   disableColors: !import.meta.dev,
-    // },
-
-    emailAndPassword: {
-      enabled: true,
-      requireEmailVerification: false,
-    },
-
-    trustedOrigins: [
-      'http://localhost:3000',
-      'http://localhost:8787',
-      'https://*.meyer1994.workers.dev',
-    ],
-
-    // secondaryStorage: serverAuthSecondaryStorage(event),
+    ...DEFAULT_OPTIONS,
   })
 }
