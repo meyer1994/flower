@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm run db:generate:auth && pnpm run cf:types && pnpm run typecheck && nuxt build",
+    "build": "nuxt build",
     "dev": "nuxt dev",
     "dev:systemd": "systemd-run --user --scope -p MemoryMax=4096M nuxt dev",
     "lint": "eslint .",
@@ -13,10 +13,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "db:generate:auth": "pnpm better-auth generate --config auth.config.ts --output server/db/auth.ts -y && eslint --fix server/db/auth.ts",
-    "db:generate": "pnpm run db:generate:auth && dotenv -e .env drizzle-kit generate",
+    "auth:generate": "pnpm better-auth generate --config auth.config.ts --output server/db/auth.ts -y && eslint --fix server/db/auth.ts",
+    "db:generate": "dotenv -e .env drizzle-kit generate",
     "db:migrate": "pnpm run cf:migrate",
-    "cf:deploy": "pnpm run build && wrangler --cwd .output deploy",
+    "cf:deploy": "wrangler --cwd .output deploy",
     "cf:types": "wrangler types shared/wrangler.d.ts && eslint --fix shared/wrangler.d.ts",
     "cf:migrate": "wrangler d1 migrations apply flower",
     "cf:secrets": "wrangler secret bulk .env"
