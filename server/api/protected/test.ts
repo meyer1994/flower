@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
   if (!apiKey) {
     throw createError({
-      code: 401,
+      status: 401,
       message: 'Missing API key. Provide x-api-key header.',
     })
   }
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
   if (!result.valid) {
     throw createError({
-      code: 401,
+      status: 401,
       message: 'Unauthorized',
     })
   }
