@@ -1,3 +1,4 @@
+import { apiKeyClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/vue'
 
 export function useAuth() {
@@ -7,6 +8,9 @@ export function useAuth() {
   const client = createAuthClient({
     baseURL: url.origin,
     fetchOptions: { headers },
+    plugins: [
+      apiKeyClient(),
+    ],
   })
 
   const { data, refresh } = useAsyncData('session', async () => {
@@ -35,9 +39,10 @@ export function useAuth() {
     session,
     loggedIn,
     client,
-    signIn: client.signIn,
     signOut,
-    signUp: client.signUp,
     fetchSession,
+    signIn: client.signIn,
+    signUp: client.signUp,
+    apiKey: client.apiKey,
   }
 }

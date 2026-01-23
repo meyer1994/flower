@@ -14,6 +14,12 @@ const items = computed<NavigationMenuItem[]>(() => {
         open: route.path.startsWith('/demo'),
       },
       {
+        to: '/keys',
+        label: 'Keys',
+        icon: 'i-lucide-key',
+        open: route.path.startsWith('/keys'),
+      },
+      {
         to: '/profile',
         label: 'Profile',
         icon: 'i-lucide-user',

@@ -65,8 +65,8 @@ const logger = t.middleware(async ({ next, ctx }) => {
 })
 
 const isAuthenticated = t.middleware(async ({ next, ctx }) => {
-  if (!ctx.session) throw createError({ statusCode: 401, statusMessage: 'No session found' })
-  if (!ctx.session.user) throw createError({ statusCode: 401, statusMessage: 'No user found in session' })
+  if (!ctx.session) throw createError({ code: 401, statusMessage: 'No session found' })
+  if (!ctx.session.user) throw createError({ code: 401, statusMessage: 'No user found in session' })
 
   const path = ctx.event.path.split('?')[0]
   console.info(`[server.trpc] user ${ctx.session.user.id} authenticated for ${path}`)

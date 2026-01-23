@@ -1,4 +1,4 @@
-import type { BetterAuthOptions, SecondaryStorage } from 'better-auth'
+import type { SecondaryStorage } from 'better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { apiKey } from 'better-auth/plugins'
@@ -34,7 +34,7 @@ const serverAuthSecondaryStorage = (event: H3Event): SecondaryStorage => {
   }
 }
 
-export const DEFAULT_OPTIONS: BetterAuthOptions = {
+export const DEFAULT_OPTIONS = {
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
@@ -59,7 +59,7 @@ export const DEFAULT_OPTIONS: BetterAuthOptions = {
   ],
 }
 
-export const serverAuth = (event: H3Event): ReturnType<typeof betterAuth> => {
+export const serverAuth = (event: H3Event) => {
   const db = serverDrizzle(event)
 
   return betterAuth({

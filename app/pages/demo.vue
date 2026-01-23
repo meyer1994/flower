@@ -14,12 +14,12 @@ const [
 ])
 
 if (errorUsers.value) throw createError({
-  statusCode: errorUsers.value.data?.httpStatus,
+  code: errorUsers.value.data?.httpStatus,
   statusMessage: JSON.stringify(errorUsers.value.data),
 })
 
 if (errorFiles.value) throw createError({
-  statusCode: errorFiles.value.data?.httpStatus,
+  code: errorFiles.value.data?.httpStatus,
   statusMessage: JSON.stringify(errorFiles.value.data),
 })
 
