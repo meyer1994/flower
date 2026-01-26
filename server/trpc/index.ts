@@ -1,5 +1,6 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { filesRouter } from '~~/server/trpc/files'
+import { queueRouter } from '~~/server/trpc/queue'
 import { usersRouter } from '~~/server/trpc/users'
 import { vectorRouter } from '~~/server/trpc/vector'
 import { baseProcedure, createTRPCRouter } from '../lib/trpc'
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   users: usersRouter,
   files: filesRouter,
   vector: vectorRouter,
+  queue: queueRouter,
 })
 
 // export type definition of API

@@ -3,6 +3,7 @@ import type { BetterAuthClientOptions, InferSessionFromClient, InferUserFromClie
 import type { H3Event } from 'h3'
 import { serverAuth } from './auth'
 import { serverDrizzle } from './drizzle'
+import { serverQueue } from './queue'
 import { serverStorage } from './storage'
 import { serverVector } from './vector'
 
@@ -16,6 +17,7 @@ export type TRPCContext = {
   db: ReturnType<typeof serverDrizzle>
   storage: ReturnType<typeof serverStorage>
   vector: ReturnType<typeof serverVector>
+  queue: ReturnType<typeof serverQueue>
   auth: ReturnType<typeof serverAuth>
   session: Session | null
 }
@@ -29,6 +31,7 @@ export const createTRPCContext = async (event: H3Event) => {
   const db = serverDrizzle(event)
   const storage = serverStorage(event)
   const vector = serverVector(event)
+  const queue = serverQueue(event)
   const session = await auth.api.getSession({ headers: event.headers })
   console.info('[server.trpc] user id', session?.user?.id)
   console.info('[server.trpc] session id', session?.session?.id)
@@ -38,6 +41,7 @@ export const createTRPCContext = async (event: H3Event) => {
     db,
     storage,
     vector,
+    queue,
     auth,
     session,
   } satisfies TRPCContext

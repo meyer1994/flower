@@ -71,6 +71,21 @@
 	"ai": {
 		"binding": "AI",
 		"remote": true
+	},
+	"queues": {
+		"producers": [
+			{
+				"binding": "QUEUE",
+				"queue": "flower"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "flower",
+				"max_batch_size": 10,
+				"max_retries": 0,
+			}
+		]
 	}
 	/**
 	 * Service Bindings (communicate between multiple Workers)

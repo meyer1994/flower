@@ -4,7 +4,6 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 definePageMeta({ auth: true })
 
 const { user, signOut } = useAuth()
-const route = useRoute()
 
 const profileItems: DropdownMenuItem[][] = [
   [
@@ -43,6 +42,11 @@ const itemsDemo: NavigationMenuItem[] = [
     label: 'Playground',
     icon: 'i-lucide-terminal',
     to: '/dash/playground',
+  },
+  {
+    label: 'Queue',
+    icon: 'i-lucide-list-todo',
+    to: '/dash/queue',
   },
 ]
 </script>
