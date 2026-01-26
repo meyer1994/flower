@@ -10,6 +10,11 @@ const profileItems: DropdownMenuItem[][] = [
       icon: 'i-lucide-user',
       to: '/profile',
     },
+    {
+      label: 'Settings',
+      icon: 'i-lucide-settings',
+      to: '/settings',
+    },
   ],
   [
     {
