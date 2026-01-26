@@ -4,8 +4,7 @@ const { loggedIn } = useAuth()
 const heroLinks = computed(() => {
   if (loggedIn.value) {
     return [
-      { label: 'Go to Demo', to: '/demo', icon: 'i-lucide-play', color: 'primary' as const },
-      { label: 'View Profile', to: '/profile', icon: 'i-lucide-user', color: 'neutral' as const },
+      { label: 'Go to Dashboard', to: '/dash', icon: 'i-lucide-layout-dashboard', color: 'primary' as const },
     ]
   }
   return [

@@ -1,48 +1,27 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from '@nuxt/ui'
 
-const route = useRoute()
-const { loggedIn, signOut } = useAuth()
+const { loggedIn, user, signOut } = useAuth()
 
-const items = computed<NavigationMenuItem[]>(() => {
-  if (loggedIn.value) {
-    return [
-      {
-        to: '/demo',
-        label: 'Demo',
-        icon: 'i-lucide-play',
-        open: route.path.startsWith('/demo'),
-      },
-      {
-        to: '/keys',
-        label: 'Keys',
-        icon: 'i-lucide-key',
-        open: route.path.startsWith('/keys'),
-      },
-      {
-        to: '/profile',
-        label: 'Profile',
-        icon: 'i-lucide-user',
-        open: route.path.startsWith('/profile'),
-      },
-    ]
-  }
-
-  return [
+const profileItems: DropdownMenuItem[][] = [
+  [
     {
-      to: '/signin',
-      label: 'Sign In',
-      icon: 'i-lucide-log-in',
-      open: route.path.startsWith('/signin'),
+      label: 'Profile',
+      icon: 'i-lucide-user',
+      to: '/profile',
     },
+  ],
+  [
     {
-      to: '/signup',
-      label: 'Sign Up',
-      icon: 'i-lucide-user-plus',
-      open: route.path.startsWith('/signup'),
+      label: 'Sign out',
+      icon: 'i-lucide-log-out',
+      onSelect: async () => {
+        await signOut()
+        await reloadNuxtApp({ path: '/' })
+      },
     },
-  ]
-})
+  ],
+]
 </script>
 
 <template>
@@ -57,29 +36,84 @@ const items = computed<NavigationMenuItem[]>(() => {
       />
     </template>
 
-    <UNavigationMenu :items="items" />
-
     <template #right>
       <UColorModeButton title="Toggle Color Mode" />
+
       <template v-if="loggedIn">
         <UButton
-          icon="i-lucide-log-out"
-          title="Sign Out"
+          icon="i-lucide-layout-dashboard"
+          title="Dashboard"
           variant="ghost"
           color="neutral"
-          @click="async () => {
-            await signOut();
-            await reloadNuxtApp({ path: '/' })
-          }"
+          to="/dash"
+        />
+
+        <UDropdownMenu
+          :items="profileItems"
+          :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width)' }"
+        >
+          <UButton
+            icon="i-lucide-user"
+            :label="user?.name ?? 'Profile'"
+            color="neutral"
+            variant="ghost"
+          />
+        </UDropdownMenu>
+      </template>
+
+      <template v-else>
+        <UButton
+          to="/signin"
+          label="Sign In"
+          variant="ghost"
+          color="neutral"
+        />
+        <UButton
+          to="/signup"
+          label="Sign Up"
+          color="primary"
         />
       </template>
     </template>
 
     <template #body>
-      <UNavigationMenu
-        :items="items"
-        orientation="vertical"
-      />
+      <div class="flex flex-col gap-2 p-4">
+        <template v-if="loggedIn">
+          <UButton
+            to="/dash"
+            label="Dashboard"
+            icon="i-lucide-layout-dashboard"
+            variant="ghost"
+            color="neutral"
+            block
+          />
+          <UButton
+            to="/profile"
+            label="Profile"
+            icon="i-lucide-user"
+            variant="ghost"
+            color="neutral"
+            block
+          />
+        </template>
+        <template v-else>
+          <UButton
+            to="/signin"
+            label="Sign In"
+            icon="i-lucide-log-in"
+            variant="ghost"
+            color="neutral"
+            block
+          />
+          <UButton
+            to="/signup"
+            label="Sign Up"
+            icon="i-lucide-user-plus"
+            color="primary"
+            block
+          />
+        </template>
+      </div>
     </template>
   </UHeader>
 </template>

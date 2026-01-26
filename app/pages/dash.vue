@@ -55,7 +55,8 @@ const items: NavigationMenuItem[] = [
       :ui="{ footer: 'border-t border-default' }"
     >
       <template #header="{ collapsed }">
-        <span
+        <ULink
+          to="/"
           :class="{
             'mx-auto': collapsed,
             'flex items-center gap-2': true,
@@ -71,7 +72,7 @@ const items: NavigationMenuItem[] = [
           >
             flower
           </span>
-        </span>
+        </ULink>
       </template>
 
       <template #default="{ collapsed }">
