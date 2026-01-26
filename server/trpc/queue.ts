@@ -22,7 +22,7 @@ export const queueRouter = createTRPCRouter({
       })
 
       await ctx.db.update(TTasks)
-        .set({ status: 'RUNNING' })
+        .set({ status: 'PENDING' })
         .where(eq(TTasks.id, task.id))
 
       return task
@@ -35,5 +35,15 @@ export const queueRouter = createTRPCRouter({
         .from(TTasks)
         .orderBy(desc(TTasks.createdAt))
         .limit(50)
+    }),
+
+  delete: baseProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db
+        .delete(TTasks)
+        .where(eq(TTasks.id, input.id))
+
+      return { success: true }
     }),
 })

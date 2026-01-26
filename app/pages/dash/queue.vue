@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import type { FormSubmitEvent } from '@nuxt/ui'
-import * as z from 'zod'
+import type { FormQueueMessageData } from '~/components/FormQueueMessage.vue'
 
 const { $trpc } = useNuxtApp()
-const toast = useToast()
 
 // Fetch tasks from database
 const { data: tasks, refresh } = await useAsyncData(
@@ -11,27 +9,13 @@ const { data: tasks, refresh } = await useAsyncData(
   () => $trpc.queue.list.query(),
 )
 
-const schema = z.object({
-  message: z.string().min(1, 'Message is required'),
-})
-
-type Schema = z.output<typeof schema>
-const state = reactive<Partial<Schema>>({ message: '' })
-
 const loading = ref(false)
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(data: FormQueueMessageData) {
   loading.value = true
-
   try {
-    await $trpc.queue.send.mutate({ message: event.data.message })
-    state.message = ''
-    toast.add({ title: 'Task created', description: 'Task added to queue', color: 'success' })
+    await $trpc.queue.send.mutate({ message: data.message })
     await refresh()
-  }
-  catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    toast.add({ title: 'Error', description: errorMessage, color: 'error' })
   }
   finally {
     loading.value = false
@@ -45,6 +29,11 @@ const statusConfig = {
   ERRORED: { icon: 'i-lucide-x-circle', color: 'text-error', label: 'Errored' },
   FINISHED: { icon: 'i-lucide-check-circle', color: 'text-success', label: 'Finished' },
 } as const
+
+async function onDelete(id: string) {
+  await $trpc.queue.delete.mutate({ id })
+  await refresh()
+}
 </script>
 
 <template>
@@ -61,26 +50,8 @@ const statusConfig = {
         </div>
       </template>
 
-      <UForm
-        :schema="schema"
-        :state="state"
-        class="flex flex-col gap-4"
-        @submit="onSubmit"
-      >
-        <UFormField
-          name="message"
-          label="Message"
-          description="Enter the message to send to the queue"
-        >
-          <UTextarea
-            v-model="state.message"
-            placeholder="Enter your message..."
-            :rows="4"
-            class="w-full"
-          />
-        </UFormField>
-
-        <div class="flex gap-2">
+      <FormQueueMessage @submit="onSubmit">
+        <template #submit-button>
           <UButton
             type="submit"
             :loading="loading"
@@ -88,8 +59,8 @@ const statusConfig = {
           >
             Send to Queue
           </UButton>
-        </div>
-      </UForm>
+        </template>
+      </FormQueueMessage>
     </UCard>
 
     <!-- Tasks -->
@@ -154,6 +125,13 @@ const statusConfig = {
               {{ new Date(task.createdAt).toLocaleString() }}
             </p>
           </div>
+          <UButton
+            variant="ghost"
+            color="neutral"
+            icon="i-lucide-trash-2"
+            size="xs"
+            @click="onDelete(task.id)"
+          />
         </div>
       </div>
 
