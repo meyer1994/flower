@@ -11,8 +11,9 @@ This is a Vue 3 + Nuxt 4 + Nuxt UI 4 application with AI/LangChain integration f
 - **Frontend**: Vue 3 + Nuxt 4 + Nuxt UI 4 + VueUse + Tailwind v4
 - **Backend**: tRPC + Drizzle ORM (Cloudflare D1/SQLite) + H3
 - **AI**: LangChain + Langgraph + Cloudflare Workers AI
-- **Auth**: nuxt-auth-utils (Auth0)
-- **Storage**: AWS S3 Compatible (Cloudflare R2)
+- **Auth**: Better Auth
+- **Storage**: Cloudflare R2 (S3 Compatible), Cloudflare KV, Cloudflare Vectorize
+- **Queue**: Cloudflare Queues
 - **Package Manager**: pnpm
 
 ## Project Structure
@@ -23,13 +24,15 @@ This is a Vue 3 + Nuxt 4 + Nuxt UI 4 application with AI/LangChain integration f
 │   ├── components/      # Vue components (prefixed by type, e.g., Table*, Form*)
 │   ├── pages/           # Nuxt pages for routing
 │   └── plugins/trpc.ts  # tRPC client setup
-└── server/              # Backend application
-    ├── api/trpc/        # tRPC endpoint handler
-    ├── db/              # Database schema & migrations
-    ├── middleware/      # Server middleware (db, storage, vector initialization)
-    ├── tasks/           # Background tasks / Nitro tasks
-    ├── trpc/            # tRPC routers & procedures
-    └── utils/           # Server utilities (auto-imported by Nuxt)
+├── server/              # Backend application
+│   ├── api/             # Standard API endpoints (auth, webhooks)
+│   ├── db/              # Database schema & migrations
+│   ├── lib/             # Core logic and library initializations (auth, db, queue, etc.)
+│   ├── middleware/      # Server middleware
+│   ├── tasks/           # Background tasks / Nitro tasks
+│   ├── trpc/            # tRPC routers & procedures
+│   └── utils/           # Server utilities (auto-imported by Nuxt)
+└── shared/              # Shared types and constants
 ```
 
 ## Development Commands

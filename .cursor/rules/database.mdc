@@ -88,17 +88,26 @@ const users = await ctx.db
   .select()
   .from(TUsers)
   .orderBy(desc(TUsers.createdAt))
+  .all()
+
+// SELECT ONE
+const user = await ctx.db
+  .select()
+  .from(TUsers)
+  .where(eq(TUsers.id, userId))
+  .get()
 
 // INSERT
-const [newUser] = await ctx.db
+const newUser = await ctx.db
   .insert(TUsers)
   .values({
     name: 'John Doe',
   })
   .returning()
+  .get()
 
 // UPDATE
-const [updatedUser] = await ctx.db
+const updatedUser = await ctx.db
   .update(TUsers)
   .set({ 
     name: 'Jane Doe',
@@ -106,12 +115,13 @@ const [updatedUser] = await ctx.db
   })
   .where(eq(TUsers.id, userId))
   .returning()
+  .get()
 
 // DELETE
-const [deletedUser] = await ctx.db
+await ctx.db
   .delete(TUsers)
   .where(eq(TUsers.id, userId))
-  .returning()
+  .run()
 ```
 
 ### Relations Queries

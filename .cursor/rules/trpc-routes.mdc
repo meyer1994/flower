@@ -20,10 +20,10 @@ server/trpc/
 ```typescript
 import { z } from "zod";
 import { TUsers } from "../db/schema";
-import { baseProcedure, createTRPCRouter } from "../utils/trpc";
+import { baseProcedure, createTRPCRouter, protectedProcedure } from "../lib/trpc";
 
 export const userRouter = createTRPCRouter({
-  list: baseProcedure
+  list: protectedProcedure
     .input(z.object({ limit: z.number().optional() }))
     .query(async ({ input, ctx }) => {
       // Use ctx.db for database access
@@ -33,7 +33,7 @@ export const userRouter = createTRPCRouter({
         .limit(input.limit ?? 10);
     }),
 
-  create: baseProcedure
+  create: protectedProcedure
     .input(z.object({ name: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const [result] = await ctx.db
@@ -50,13 +50,21 @@ export const userRouter = createTRPCRouter({
 All procedures have access to the context `ctx`, which includes:
 
 - `ctx.db`: Drizzle database instance.
-- `ctx.storage`: File storage utility.
-- `ctx.vector`: Vector storage utility.
+- `ctx.storage`: File storage utility (Cloudflare R2).
+- `ctx.vector`: Vector storage utility (Cloudflare Vectorize).
+- `ctx.queue`: Queue producer (Cloudflare Queues).
+- `ctx.auth`: Better Auth server client.
+- `ctx.session`: Session and user info (null if not authenticated).
 - `ctx.event`: The H3 event.
+
+### Procedure Types
+
+- `baseProcedure`: Public procedure with logging.
+- `protectedProcedure`: Requires authentication, throws 401 if no session.
 
 ## Key Guidelines
 
 1. **Input Validation**: Always use Zod for `.input()`.
 2. **Error Handling**: Do not use `try/catch` inside procedures unless you need to transform an error. Let tRPC handle errors automatically.
-3. **Simplicity**: Procedures should be thin. Move complex logic to `server/utils/` if it needs to be reused.
+3. **Simplicity**: Procedures should be thin. Move complex logic to `server/lib/` or `server/utils/`.
 4. **Naming**: Use descriptive names for procedures (`list`, `get`, `create`, `update`, `delete`).

@@ -16,7 +16,7 @@ instead define and use `emits` to communicate changes back to the parent page.
 ```vue
 <script setup lang="ts">
 const { $trpc } = useNuxtApp()
-const { data, refresh } = await $trpc.users.list.query()
+const { data, refresh } = await useAsyncData('users-list', () => $trpc.users.list.query())
 </script>
 
 <template>
@@ -38,7 +38,8 @@ const { data, refresh } = await $trpc.users.list.query()
 ```vue
 <script setup lang="ts">
 const { $trpc } = useNuxtApp()
-const { data, refresh } = await $trpc.users.list.query()
+// Fetching directly without useAsyncData or useQuery might not work well with SSR
+const data = await $trpc.users.list.query()
 </script>
 
 <template>
