@@ -2,7 +2,6 @@
 
 A modern Nuxt template
 
-
 ## Getting started
 
 ```bash
@@ -15,7 +14,6 @@ pnpm run dev
 ```
 
 For Cloudflare services, check the [deployment](#deployment) section.
-
 
 ## Features
 
@@ -31,18 +29,19 @@ Out of the box:
   - [tRPC](https://trpc.io/)
   - [Drizzle ORM](https://orm.drizzle.team/)
   - [Better Auth](https://better-auth.com/)
-- **Hosting**:
+- **Infrastructure**:
   - [Cloudflare Workers](https://developers.cloudflare.com/workers/)
+  - [Cloudflare Queues](https://developers.cloudflare.com/queues/)
+  - [Cloudflare R2 / S3](https://developers.cloudflare.com/r2/)
+  - [Cloudflare Vectorize](https://developers.cloudflare.com/vectorize/)
 - **Development**:
   - [ESLint](https://eslint.org/)
   - [TypeScript](https://www.typescriptlang.org/)
   - [pnpm](https://pnpm.io/)
 
-
 ## Development
 
 Simply run `pnpm run dev` to start the development server.
-
 
 ### Auth
 
@@ -52,17 +51,16 @@ docs for more information.
 This app contains the minimal setup for authentication using D1 as the database.
 
 There is a middleware implemented in `app/middleware/auth.global.ts` to protect
-routes that are marked with the `auth` meta. 
+routes that are marked with the `auth` meta.
 
 ```vue
 <script setup lang="ts">
-definePageMeta({ auth: true })  // protects the route
+definePageMeta({ auth: true }); // protects the route
 </script>
 ```
 
 If the user is not logged in, they will be redirected to a 404 page. As it is
 currently configured, we refresh the session on every route navigation.
-
 
 ### API Keys
 
@@ -72,16 +70,15 @@ page. Keys are managed through Better Auth's `apiKey` plugin.
 To verify an API key in a server route:
 
 ```typescript
-const auth = serverAuth(event)
-const apiKey = getHeader(event, 'x-api-key')
-const result = await auth.api.verifyApiKey({ body: { key: apiKey } })
+const auth = serverAuth(event);
+const apiKey = getHeader(event, "x-api-key");
+const result = await auth.api.verifyApiKey({ body: { key: apiKey } });
 if (!result.valid) {
-  throw createError({ code: 401, message: 'Unauthorized' })
+  throw createError({ code: 401, message: "Unauthorized" });
 }
 ```
 
 See `server/api/protected/test.ts` for a full example.
-
 
 ### Database
 
@@ -105,7 +102,6 @@ pnpm run db:migrate
 pnpm run db:migrate --remote  # updates remote database
 ```
 
-
 ### Storage
 
 There are two storage providers: S3 and R2. S3 can be used with any S3
@@ -122,7 +118,6 @@ Unfortunately, R2 bindings do not give us a way to presign URLs for objects. So
 we need to use the `@aws-sdk/s3-request-presigner` and configure S3 compatible
 vars from R2 to be able to presign URLs for objects.
 
-
 ## Deployment
 
 This project was primarily made to work with Cloudflare workers. But it can be
@@ -136,6 +131,7 @@ pnpm wrangler d1 create '<NAME>'
 pnpm wrangler vectorize create '<NAME>'
 pnpm wrangler r2 bucket create '<NAME>'
 pnpm wrangler kv namespace create '<NAME>'
+pnpm wrangler queues create '<NAME>'
 ```
 
 The following command will generate all types for Cloudflare and Better Auth,
@@ -144,7 +140,6 @@ before running the build and deploying to Cloudflare.
 ```bash
 pnpm run cf:deploy
 ```
-
 
 ### Secrets
 
@@ -157,7 +152,6 @@ wrangler secret bulk .env
 ```
 
 This will prompt you for the secrets and update the `.env` file.
-
 
 ### `global_fetch_strictly_public`
 
