@@ -4,16 +4,16 @@ import type { AppRouterOutputs } from '~~/server/trpc'
 const { $trpc } = useNuxtApp()
 
 const [
-  { data: dataUsers, refresh: refreshUsers, error: errorUsers, status: statusUsers },
+  { data: dataItems, refresh: refreshItems, error: errorItems, status: statusItems },
   { data: dataFiles, refresh: refreshFiles, error: errorFiles, status: statusFiles },
 ] = await Promise.all([
-  $trpc.users.list.useQuery(undefined),
+  $trpc.items.list.useQuery(undefined),
   $trpc.files.list.useQuery(undefined),
 ])
 
-if (errorUsers.value) throw createError({
-  status: errorUsers.value.data?.httpStatus,
-  statusMessage: JSON.stringify(errorUsers.value.data),
+if (errorItems.value) throw createError({
+  status: errorItems.value.data?.httpStatus,
+  statusMessage: JSON.stringify(errorItems.value.data),
 })
 
 if (errorFiles.value) throw createError({
@@ -55,31 +55,31 @@ const onSearch = async (e: { query: string, prefix?: string }) => {
           </h2>
         </template>
 
-        <FormUser
-          :loading="statusUsers === 'pending'"
+        <FormItem
+          :loading="statusItems === 'pending'"
           @submit="async (e) => {
-            await $trpc.users.create.mutate(e)
-            await refreshUsers()
+            await $trpc.items.create.mutate(e)
+            await refreshItems()
           }"
         />
 
-        <TableUsers
-          :items="dataUsers || []"
-          :loading="statusUsers === 'pending'"
+        <TableItems
+          :items="dataItems || []"
+          :loading="statusItems === 'pending'"
           @refresh-table="async () => {
-            await refreshUsers()
+            await refreshItems()
           }"
           @update-user="async (e) => {
-            await $trpc.users.update.mutate(e)
-            await refreshUsers()
+            await $trpc.items.update.mutate(e)
+            await refreshItems()
           }"
           @delete-user="async (e) => {
-            await $trpc.users.delete.mutate(e)
-            await refreshUsers()
+            await $trpc.items.delete.mutate(e)
+            await refreshItems()
           }"
           @select-user="async (e) => {
-            await $trpc.users.update.mutate(e)
-            await refreshUsers()
+            await $trpc.items.update.mutate(e)
+            await refreshItems()
           }"
         />
       </UCard>

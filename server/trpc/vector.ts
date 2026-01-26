@@ -8,10 +8,7 @@ export const vectorRouter = createTRPCRouter({
       prefix: z.string().optional(),
     }))
     .query(async ({ input, ctx }) => {
-      const results = await ctx.vector.search(input.query, {
-        prefix: input.prefix ?? undefined,
-      })
-
-      return results
+      const prefix = `${ctx.session.user.id}/`
+      return await ctx.vector.search(input.query, { prefix })
     }),
 })

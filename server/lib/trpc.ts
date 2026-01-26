@@ -22,6 +22,10 @@ export type TRPCContext = {
   session: Session | null
 }
 
+export type TRPCContextProtected = TRPCContext & {
+  session: Session
+}
+
 export const createTRPCContext = async (event: H3Event) => {
   /**
   * @see: https://trpc.io/docs/server/context
@@ -75,7 +79,7 @@ const isAuthenticated = t.middleware(async ({ next, ctx }) => {
   const path = ctx.event.path.split('?')[0]
   console.info(`[server.trpc] user ${ctx.session.user.id} authenticated for ${path}`)
 
-  return next({ ctx })
+  return next({ ctx } as { ctx: TRPCContextProtected })
 })
 
 // Base router and procedure helpers

@@ -17,7 +17,7 @@ export function useAuth() {
     console.info('[client.auth] fetching session')
     const session = await client.getSession()
     return session.data
-  }, { server: false })
+  })
 
   const user = computed(() => data.value?.user || null)
   const session = computed(() => data.value?.session || null)
@@ -31,7 +31,6 @@ export function useAuth() {
   const signOut = async () => {
     await client.signOut()
     data.value = null
-    await refresh()
   }
 
   return {

@@ -21,7 +21,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const { loggedIn, fetchSession } = useAuth()
   await fetchSession()
 
-  // skip if noth protected route
+  // skip if not protected route
   if (!to.meta.auth) return
   // abort if not logged in (404)
   if (!loggedIn.value) return abortNavigation()

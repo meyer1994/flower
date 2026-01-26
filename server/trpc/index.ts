@@ -1,24 +1,17 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { filesRouter } from '~~/server/trpc/files'
+import { itemsRouter } from '~~/server/trpc/items'
 import { queueRouter } from '~~/server/trpc/queue'
-import { usersRouter } from '~~/server/trpc/users'
 import { vectorRouter } from '~~/server/trpc/vector'
 import { baseProcedure, createTRPCRouter } from '../lib/trpc'
 
 export const appRouter = createTRPCRouter({
   ping: baseProcedure
-    .query(() => {
-      return 'pong'
-    }),
-
+    .query(() => 'pong'),
   health: baseProcedure
-    .query(() => {
-      const timestamp = new Date().toISOString()
+    .query(() => ({ status: 'ok', timestamp: new Date().toISOString() })),
 
-      return { status: 'ok', timestamp }
-    }),
-
-  users: usersRouter,
+  items: itemsRouter,
   files: filesRouter,
   vector: vectorRouter,
   queue: queueRouter,

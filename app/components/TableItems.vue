@@ -2,7 +2,7 @@
 import type { AppRouterOutputs } from '@@/server/trpc'
 import type { TableColumn } from '@nuxt/ui'
 
-type Item = AppRouterOutputs['users']['list'][number]
+type Item = AppRouterOutputs['items']['list'][number]
 
 type Props = {
   items: Item[]
@@ -54,6 +54,7 @@ const MAP_ID_TO_LABEL: Record<string, string> = columns
 const visible: Ref<Record<Keys, boolean>> = ref({
   id: true,
   name: true,
+  userId: false,
   createdAt: true,
   updatedAt: false,
   actions: true,
@@ -121,7 +122,7 @@ const table = useTemplateRef('table')
       :sticky="true"
       :empty-state="{
         icon: 'i-lucide-box',
-        label: 'No users found',
+        label: 'No items found',
       }"
       :ui="{
         tr: 'hover:bg-muted cursor-pointer',
@@ -173,8 +174,8 @@ const table = useTemplateRef('table')
             color="error"
             variant="ghost"
             size="sm"
-            title="Delete user"
-            aria-label="Delete user"
+            title="Delete item"
+            aria-label="Delete item"
             @click="emit('delete-user', row.original)"
           />
         </div>

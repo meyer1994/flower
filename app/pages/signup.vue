@@ -64,7 +64,7 @@ const providers = [
               name: e.data.email,
               password: e.data.password,
             })
-            return await reloadNuxtApp({ path: '/' })
+            await navigateTo('/')
           }"
         />
       </UPageCard>

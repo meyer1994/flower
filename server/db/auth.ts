@@ -16,7 +16,6 @@ export const user = sqliteTable('user', {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-  stripeCustomerId: text('stripe_customer_id'),
 })
 
 export const session = sqliteTable(
@@ -122,26 +121,6 @@ export const apikey = sqliteTable(
     index('apikey_userId_idx').on(table.userId),
   ],
 )
-
-export const subscription = sqliteTable('subscription', {
-  id: text('id').primaryKey(),
-  plan: text('plan').notNull(),
-  referenceId: text('reference_id').notNull(),
-  stripeCustomerId: text('stripe_customer_id'),
-  stripeSubscriptionId: text('stripe_subscription_id'),
-  status: text('status').default('incomplete'),
-  periodStart: integer('period_start', { mode: 'timestamp_ms' }),
-  periodEnd: integer('period_end', { mode: 'timestamp_ms' }),
-  trialStart: integer('trial_start', { mode: 'timestamp_ms' }),
-  trialEnd: integer('trial_end', { mode: 'timestamp_ms' }),
-  cancelAtPeriodEnd: integer('cancel_at_period_end', {
-    mode: 'boolean',
-  }).default(false),
-  cancelAt: integer('cancel_at', { mode: 'timestamp_ms' }),
-  canceledAt: integer('canceled_at', { mode: 'timestamp_ms' }),
-  endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
-  seats: integer('seats'),
-})
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),

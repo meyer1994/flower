@@ -3,11 +3,6 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 
 const { loggedIn, signOut } = useAuth()
 
-const handleSignOut = async () => {
-  await signOut()
-  await reloadNuxtApp({ path: '/' })
-}
-
 const loggedInItems = ref<NavigationMenuItem[]>([
   {
     label: 'Home',
@@ -25,7 +20,10 @@ const loggedInItems = ref<NavigationMenuItem[]>([
     label: 'Sign out',
     icon: 'i-lucide-log-out',
     description: 'Sign out of your account',
-    onSelect: handleSignOut,
+    onSelect: async () => {
+      await signOut()
+      await reloadNuxtApp({ path: '/' })
+    },
   },
 ])
 

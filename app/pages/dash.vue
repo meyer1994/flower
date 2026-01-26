@@ -22,7 +22,10 @@ const profileItems: DropdownMenuItem[][] = [
     {
       label: 'Sign out',
       icon: 'i-lucide-log-out',
-      onSelect: signOut,
+      onSelect: async () => {
+        await signOut()
+        await reloadNuxtApp({ path: '/' })
+      },
     },
   ],
 ]

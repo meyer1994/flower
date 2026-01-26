@@ -1,5 +1,4 @@
 import * as z from 'zod'
-import type { TRPCContext } from '../lib/trpc'
 import { createTRPCRouter, protectedProcedure } from '../lib/trpc'
 import { onFileUpload } from '../tasks/onFileUpload'
 
@@ -17,14 +16,17 @@ export const filesRouter = createTRPCRouter({
             .refine(f => f.name.trim().length > 0),
         })))
     .mutation(async ({ input, ctx }) => {
-      await ctx.storage.put(input.file.name, input.file)
-
-      ctx.event.waitUntil(onFileUpload(input.file.name, ctx as TRPCContext))
+      const key = `${ctx.session.user.id}/${input.file.name}`
+      await ctx.storage.put(key, input.file)
+      ctx.event.waitUntil(onFileUpload(key, ctx))
     }),
 
   delete: protectedProcedure
     .input(z.object({ key: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      if (!input.key.startsWith(`${ctx.session.user.id}/`))
+        throw createError({ status: 403, message: 'Unauthorized' })
+
       await Promise.all([
         ctx.storage.del(input.key),
         ctx.vector.del(input.key),
@@ -33,13 +35,11 @@ export const filesRouter = createTRPCRouter({
 
   list: protectedProcedure
     .query(async ({ ctx }) => {
-      const items = await ctx.storage.list()
+      const items = await ctx.storage.list(`${ctx.session.user.id}/`)
 
-      const result = await Promise.all(items.map(async item => ({
+      return await Promise.all(items.map(async item => ({
         ...item,
         url: await ctx.storage.presign(item.key),
       })))
-
-      return result
     }),
 })
