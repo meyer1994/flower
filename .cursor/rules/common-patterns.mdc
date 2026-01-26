@@ -5,7 +5,9 @@ alwaysApply: true
 
 # Flower Project Common Patterns & Conventions
 
-This rule captures the most frequent coding patterns and conventions used across the codebase. For more detailed guides, refer to the specific rules linked below.
+This rule captures the most frequent coding patterns and conventions used across
+the codebase. For more detailed guides, refer to the specific rules linked
+below.
 
 ## 🛠 Tech Stack
 
@@ -16,11 +18,14 @@ This rule captures the most frequent coding patterns and conventions used across
 
 ## 🧠 General Principles
 
-- **Assume Happy Path**: Always assume the happy path unless explicitly told otherwise. Avoid defensive programming or complex error handling if not requested, to keep the code simple and readable.
+- **Assume Happy Path**: Always assume the happy path unless explicitly told
+  otherwise. Avoid defensive programming or complex error handling if not
+  requested, to keep the code simple and readable.
 
 ## 🎨 Formatting & Style (ESLint Stylistic)
 
-- **No semicolons**, **Trailing commas**, **Line length**: 100 chars, **Single quotes**.
+- **No semicolons**, **Trailing commas**, **Line length**: 100 chars, **Single
+  quotes**.
 
 ## 🏗 Frontend Patterns
 
@@ -35,22 +40,30 @@ This rule captures the most frequent coding patterns and conventions used across
 
 - **Fetch at Page Level**: Use `useAsyncData` or `$trpc.*.useQuery()`.
 - **Child Components**: Should be "dumb" (presentational).
-- See [Data Fetching Patterns](mdc:.cursor/rules/ui-pages.mdc) for detailed examples.
+- See [Data Fetching Patterns](mdc:.cursor/rules/ui-pages.mdc) for detailed
+  examples.
 
 ### 3. UI Components
 
-- **Forms**: Use Nuxt UI 4 + Zod. See [Form Rules](mdc:.cursor/rules/ui-form.mdc).
-- **Tables**: Use Nuxt UI 4 `UTable`. See [Table Rules](mdc:.cursor/rules/ui-table.mdc).
-- **Colors & Icons**: Use semantic colors and Lucide icons. See [UI Colors](mdc:.cursor/rules/ui-colors.mdc).
+- **Forms**: Use Nuxt UI 4 + Zod. See [Form
+  Rules](mdc:.cursor/rules/ui-form.mdc).
+- **Tables**: Use Nuxt UI 4 `UTable`. See [Table
+  Rules](mdc:.cursor/rules/ui-table.mdc).
+- **Colors & Icons**: Use semantic colors and Lucide icons. See [UI
+  Colors](mdc:.cursor/rules/ui-colors.mdc).
 
 ## 🔗 tRPC Patterns
 
-- **Client Usage**: Use reactive queries and mutations. See [tRPC Client Guide](mdc:.cursor/rules/trpc-client.mdc).
-- **Server Implementation**: Keep procedures thin; move logic to `server/lib/` or `server/utils/`. See [tRPC Route Patterns](mdc:.cursor/rules/trpc-routes.mdc).
+- **Client Usage**: Use reactive queries and mutations. See [tRPC Client
+  Guide](mdc:.cursor/rules/trpc-client.mdc).
+- **Server Implementation**: Keep procedures thin; move logic to `server/lib/`
+  or `server/utils/`. See [tRPC Route
+  Patterns](mdc:.cursor/rules/trpc-routes.mdc).
 
 ## 🗄 Backend Patterns
 
-- **Drizzle ORM**: Use `T` prefix for tables and `R` for relations. See [Database Patterns](mdc:.cursor/rules/database.mdc).
+- **Drizzle ORM**: Use `T` prefix for tables and `R` for relations. See
+  [Database Patterns](mdc:.cursor/rules/database.mdc).
 - **Storage & Services**:
   - `ctx.db`: Drizzle ORM instance.
   - `ctx.storage`: Interface for Cloudflare R2 (`get`, `put`, `del`, `list`).
@@ -60,5 +73,4 @@ This rule captures the most frequent coding patterns and conventions used across
 
 ## 💡 Pro Tips
 
-- Use `@/` or `~/` for `app/` and `@@/` or `~~/` for root.
-- Use `useToast()` for user notifications.
+- Use `~~/` for root.

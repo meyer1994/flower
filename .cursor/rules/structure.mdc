@@ -19,20 +19,19 @@ This is a Vue 3 + Nuxt 4 + Nuxt UI 4 application with AI/LangChain integration f
 ## Project Structure
 
 ```
-├── app/                 # Frontend application (Vue/Nuxt)
-│   ├── assets/          # CSS, images, etc. (main.css uses Tailwind v4)
-│   ├── components/      # Vue components (prefixed by type, e.g., Table*, Form*)
-│   ├── pages/           # Nuxt pages for routing
-│   └── plugins/trpc.ts  # tRPC client setup
-├── server/              # Backend application
-│   ├── api/             # Standard API endpoints (auth, webhooks)
-│   ├── db/              # Database schema & migrations
-│   ├── lib/             # Core logic and library initializations (auth, db, queue, etc.)
-│   ├── middleware/      # Server middleware
-│   ├── tasks/           # Background tasks / Nitro tasks
-│   ├── trpc/            # tRPC routers & procedures
-│   └── utils/           # Server utilities (auto-imported by Nuxt)
-└── shared/              # Shared types and constants
+├── app/                  # Frontend application (Vue/Nuxt)
+│   ├── assets/           # CSS, images, etc. (main.css uses Tailwind v4)
+│   ├── components/       # Vue components (prefixed by type, e.g., Table*, Form*)
+│   ├── pages/            # Nuxt pages for routing
+│   └── plugins/trpc.ts   # tRPC client setup
+├── server/               # Backend application
+│   ├── api/              # Standard API endpoints (auth, webhooks)
+│   ├── db/               # Database schema & migrations
+│   ├── lib/              # Core logic and library initializations (auth, db, queue, etc.)
+│   ├── plugins/queue.ts  # NitroJS `cloudflare:queue` hook
+│   ├── tasks/            # NitroJS tasks + other tasks, to be used with `event.waitUntil()`
+│   └── trpc/             # tRPC routers
+└── shared/               # Shared types and constants
 ```
 
 ## Development Commands
