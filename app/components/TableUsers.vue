@@ -74,6 +74,7 @@ const table = useTemplateRef('table')
         variant="ghost"
         size="sm"
         title="Atualizar"
+        aria-label="Atualizar"
         class="ml-auto"
         @click="e => emit('refresh-table')"
       />
@@ -173,6 +174,7 @@ const table = useTemplateRef('table')
             variant="ghost"
             size="sm"
             title="Delete user"
+            aria-label="Delete user"
             @click="emit('delete-user', row.original)"
           />
         </div>

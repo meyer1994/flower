@@ -106,6 +106,7 @@ function getStatusColor(status: number) {
         variant="ghost"
         size="sm"
         title="Clear history"
+        aria-label="Clear history"
         class="ml-auto"
         @click="emit('clear-history')"
       />
@@ -211,6 +212,7 @@ function getStatusColor(status: number) {
             variant="ghost"
             size="sm"
             title="View response"
+            aria-label="View response"
             @click="emit('view-response', row.original)"
           />
         </div>

@@ -49,6 +49,7 @@
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.2",
+    "mcp-remote": "^0.1.37",
     "nitro-cloudflare-dev": "^0.2.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",

@@ -64,26 +64,15 @@ function onClearHistory() {
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-semibold">
-          API Playground
-        </h1>
-        <p class="text-sm text-muted mt-1">
-          Test your API keys with live requests
-        </p>
-      </div>
-    </div>
-
-    <!-- Form Card -->
     <UCard>
       <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon
-            name="i-lucide-terminal"
-            class="text-muted"
-          />
-          <span class="font-medium">Test Request</span>
+        <div>
+          <h1 class="text-xl font-semibold">
+            Playground
+          </h1>
+          <p class="text-sm text-muted mt-1">
+            Test your API keys with live requests
+          </p>
         </div>
       </template>
 
@@ -91,10 +80,7 @@ function onClearHistory() {
         :loading="loading"
         @submit="onSubmit"
       />
-    </UCard>
 
-    <!-- History Table -->
-    <UCard class="flex-1 flex flex-col">
       <TableKeyRequests
         :items="history"
         :loading="loading"
@@ -108,7 +94,6 @@ function onClearHistory() {
       v-model:open="showResponse"
       title="Response Details"
       description="View the response details for the request"
-      class="scrollbar-gutter-stable"
       :ui="{ footer: 'justify-end' }"
     >
       <template #body>
@@ -123,9 +108,7 @@ function onClearHistory() {
               >
                 {{ selectedRequest?.method }}
               </UBadge>
-              <code class="font-mono text-sm">
-                {{ selectedRequest?.endpoint ?? 'No endpoint' }}
-              </code>
+              <code class="font-mono text-sm">{{ selectedRequest?.endpoint ?? 'No endpoint' }}</code>
             </div>
           </div>
 
@@ -148,17 +131,13 @@ function onClearHistory() {
             class="flex flex-col gap-2"
           >
             <label class="text-sm font-medium">Request Body</label>
-            <pre class="bg-muted p-3 rounded-lg text-sm font-mono overflow-auto max-h-32">
-                {{ selectedRequest?.requestBody ?? 'No request body' }}
-              </pre>
+            <pre class="bg-muted p-3 rounded-lg text-sm font-mono overflow-auto max-h-32">{{ selectedRequest?.requestBody ?? 'No request body' }}</pre>
           </div>
 
           <!-- Response Body -->
           <div class="flex flex-col gap-2">
             <label class="text-sm font-medium">Response Body</label>
-            <pre class="bg-muted p-3 rounded-lg text-sm font-mono overflow-auto max-h-64">
-                {{ selectedRequest?.responseBody ?? 'No response body' }}
-              </pre>
+            <pre class="bg-muted p-3 rounded-lg text-sm font-mono overflow-auto max-h-64">{{ selectedRequest?.responseBody ?? 'No response body' }}</pre>
           </div>
 
           <!-- Error (if any) -->

@@ -4,18 +4,19 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 definePageMeta({ auth: true })
 
 const { user, signOut } = useAuth()
+const route = useRoute()
 
 const profileItems: DropdownMenuItem[][] = [
   [
     {
       label: 'Profile',
       icon: 'i-lucide-user',
-      to: '/profile',
+      to: '/dash/profile',
     },
     {
       label: 'Settings',
       icon: 'i-lucide-settings',
-      to: '/settings',
+      to: '/dash/settings',
     },
   ],
   [
@@ -27,24 +28,22 @@ const profileItems: DropdownMenuItem[][] = [
   ],
 ]
 
-const items: NavigationMenuItem[] = [
-  [
-    {
-      label: 'Demo',
-      icon: 'i-lucide-flask-conical',
-      to: '/dash/demo',
-    },
-    {
-      label: 'API Keys',
-      icon: 'i-lucide-key',
-      to: '/dash/keys',
-    },
-    {
-      label: 'Playground',
-      icon: 'i-lucide-terminal',
-      to: '/dash/playground',
-    },
-  ],
+const itemsDemo: NavigationMenuItem[] = [
+  {
+    label: 'Demo',
+    icon: 'i-lucide-flask-conical',
+    to: '/dash/demo',
+  },
+  {
+    label: 'API Keys',
+    icon: 'i-lucide-key',
+    to: '/dash/keys',
+  },
+  {
+    label: 'Playground',
+    icon: 'i-lucide-terminal',
+    to: '/dash/playground',
+  },
 ]
 </script>
 
@@ -55,30 +54,26 @@ const items: NavigationMenuItem[] = [
       :ui="{ footer: 'border-t border-default' }"
     >
       <template #header="{ collapsed }">
-        <ULink
-          to="/"
-          :class="{
-            'mx-auto': collapsed,
-            'flex items-center gap-2': true,
-          }"
+        <NuxtLink
+          to="/dash"
+          class="font-semibold flex items-center gap-2"
+          :block="collapsed"
         >
           <UIcon
             name="i-lucide-flower"
-            class="size-5 text-primary"
+            class="size-6 text-primary"
           />
-          <span
-            v-if="!collapsed"
-            class="size-5 font-semibold"
-          >
+          <template v-if="!collapsed">
             flower
-          </span>
-        </ULink>
+          </template>
+        </NuxtLink>
       </template>
 
       <template #default="{ collapsed }">
         <UNavigationMenu
+          :block="collapsed"
           :collapsed="collapsed"
-          :items="items"
+          :items="itemsDemo"
           orientation="vertical"
         />
       </template>
@@ -88,9 +83,8 @@ const items: NavigationMenuItem[] = [
           :items="profileItems"
           class="w-full"
           icon="i-lucide-user"
-          :ui="{
-            content: 'w-(--reka-dropdown-menu-trigger-width)',
-          }"
+          :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width)' }"
+          :block="collapsed"
         >
           <UButton
             icon="i-lucide-user"
@@ -98,7 +92,7 @@ const items: NavigationMenuItem[] = [
             color="neutral"
             variant="ghost"
             class="w-full"
-            :block="collapsed"
+            aria-label="Profile menu"
           />
         </UDropdownMenu>
       </template>

@@ -67,6 +67,7 @@ const table = useTemplateRef('table')
         variant="ghost"
         size="sm"
         title="Atualizar"
+        aria-label="Atualizar"
         class="ml-auto"
         @click="e => emit('refresh-table')"
       />
@@ -154,6 +155,7 @@ const table = useTemplateRef('table')
             variant="ghost"
             size="sm"
             title="Delete file"
+            aria-label="Delete file"
             @click="emit('delete-file', row.original)"
           />
           <UButton
@@ -162,6 +164,7 @@ const table = useTemplateRef('table')
             variant="ghost"
             size="sm"
             title="Download file"
+            aria-label="Download file"
             :to="row.original?.url"
             target="_blank"
             @click="emit('download-file', row.original)"

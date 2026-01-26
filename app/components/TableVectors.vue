@@ -66,6 +66,8 @@ const table = useTemplateRef('table')
         color="neutral"
         variant="ghost"
         size="sm"
+        title="Atualizar"
+        aria-label="Atualizar"
         class="ml-auto"
         @click="emit('refresh-table')"
       />
@@ -95,6 +97,7 @@ const table = useTemplateRef('table')
           color="neutral"
           variant="outline"
           trailing-icon="i-lucide-chevron-down"
+          aria-label="Selecionar colunas"
         />
       </UDropdownMenu>
     </div>

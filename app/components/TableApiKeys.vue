@@ -90,6 +90,7 @@ const table = useTemplateRef('table')
         variant="ghost"
         size="sm"
         title="Refresh"
+        aria-label="Refresh"
         class="ml-auto"
         @click="emit('refresh-table')"
       />
@@ -190,19 +191,12 @@ const table = useTemplateRef('table')
       <template #actions-cell="{ row }">
         <div class="flex items-center gap-1">
           <UButton
-            icon="i-lucide-terminal"
-            color="neutral"
-            variant="ghost"
-            size="sm"
-            title="Test in playground"
-            @click="emit('select-key', row.original)"
-          />
-          <UButton
             icon="i-lucide-trash-2"
             color="error"
             variant="ghost"
             size="sm"
             title="Delete key"
+            aria-label="Delete key"
             @click="emit('delete-key', row.original)"
           />
         </div>

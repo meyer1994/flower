@@ -2,6 +2,10 @@
 useHead({
   title: 'flower',
   titleTemplate: '%s',
+  htmlAttrs: {
+    lang: 'en',
+    dir: 'ltr',
+  },
   meta: [
     {
       name: 'description',
