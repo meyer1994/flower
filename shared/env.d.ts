@@ -1,13 +1,13 @@
-// declare module 'h3' {
-//   interface H3EventContext {
-//     cf: CfProperties
+declare module 'h3' {
+  interface H3EventContext {
+    cf: CfProperties
 
-//     cloudflare: {
-//       env: Cloudflare.Env
-//       request: Request
-//       context: ExecutionContext
-//     }
-//   }
-// }
+    cloudflare: {
+      env: Env
+      request: Request
+      context: ExecutionContext
+    }
+  }
+}
 
-// export { }
+export { }

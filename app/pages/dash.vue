@@ -3,7 +3,8 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 
 definePageMeta({ auth: true })
 
-const { user, signOut } = useAuth()
+const { $trpc } = useNuxtApp()
+const { user, signOut, client: auth } = useAuth()
 
 const profileItems: DropdownMenuItem[][] = [
   [
@@ -16,6 +17,22 @@ const profileItems: DropdownMenuItem[][] = [
       label: 'Settings',
       icon: 'i-lucide-settings',
       to: '/dash/settings',
+    },
+  ],
+  [
+    {
+      label: 'Billing',
+      icon: 'i-lucide-credit-card',
+      to: '/dash/billing',
+    },
+    {
+      label: 'Portal',
+      icon: 'i-lucide-credit-card',
+      onSelect: async () => {
+        const { data, error } = await auth.subscription.billingPortal()
+        if (error) throw error
+        await navigateTo(data.url, { external: true })
+      },
     },
   ],
   [

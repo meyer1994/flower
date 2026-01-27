@@ -1,3 +1,4 @@
+import { stripeClient } from '@better-auth/stripe/client'
 import { apiKeyClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/vue'
 
@@ -10,6 +11,7 @@ export function useAuth() {
     fetchOptions: { headers },
     plugins: [
       apiKeyClient(),
+      stripeClient({ subscription: true }),
     ],
   })
 
@@ -37,7 +39,7 @@ export function useAuth() {
     user,
     session,
     loggedIn,
-    client,
+    client: client as typeof client,
     signOut,
     fetchSession,
     signIn: client.signIn,

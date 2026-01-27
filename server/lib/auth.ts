@@ -1,10 +1,13 @@
+import { stripe } from '@better-auth/stripe'
 import type { SecondaryStorage } from 'better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { apiKey } from 'better-auth/plugins'
 import type { H3Event } from 'h3'
+import type Stripe from 'stripe'
 import * as schema from '../db/schema'
 import { serverDrizzle } from './drizzle'
+import { serverStripe } from './stripe'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const serverAuthSecondaryStorage = (event: H3Event): SecondaryStorage => {
@@ -35,40 +38,52 @@ const serverAuthSecondaryStorage = (event: H3Event): SecondaryStorage => {
   }
 }
 
-export const DEFAULT_OPTIONS = {
-  emailAndPassword: {
+const createStripe = (client: Stripe, env: Env) => stripe({
+  stripeClient: client,
+  stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
+
+  subscription: {
     enabled: true,
-    requireEmailVerification: false,
+    plans: [
+      {
+        name: 'starter' as const,
+        priceId: env.STRIPE_PRICE_STARTER,
+      },
+      {
+        name: 'pro' as const,
+        priceId: env.STRIPE_PRICE_PRO,
+      },
+    ],
   },
-
-  // logger: {
-  //   level: 'debug',
-  //   disabled: false,
-  //   disableColors: !import.meta.dev,
-  // },
-
-  trustedOrigins: [
-    'http://localhost:3000',
-    'http://localhost:8787',
-    'https://*.meyer1994.workers.dev',
-  ],
-
-  // secondaryStorage: serverAuthSecondaryStorage(event),
-
-  plugins: [
-    apiKey(),
-  ],
-}
+})
 
 export const serverAuth = (event: H3Event) => {
   const db = serverDrizzle(event)
+  const stripe = serverStripe(event)
 
-  return betterAuth({
+  const auth = betterAuth({
     database: drizzleAdapter(db, {
       provider: 'sqlite',
       // debugLogs: true,
       schema,
     }),
-    ...DEFAULT_OPTIONS,
+
+    emailAndPassword: {
+      enabled: true,
+      requireEmailVerification: false,
+    },
+
+    plugins: [
+      apiKey(),
+      createStripe(stripe, event.context.cloudflare.env as unknown as Env),
+    ],
+
+    trustedOrigins: [
+      'http://localhost:3000',
+      'http://localhost:8787',
+      'https://*.meyer1994.workers.dev',
+    ],
   })
+
+  return auth
 }

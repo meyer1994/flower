@@ -1,10 +1,11 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { apiKey, stripe } from 'better-auth/plugins'
 import { drizzle } from 'drizzle-orm/sql-js'
-import * as schema from './server/db/schema'
-import { DEFAULT_OPTIONS } from './server/lib/auth'
 import { globSync } from 'node:fs'
 import * as pathLib from 'node:path'
+import Stripe from 'stripe'
+import * as schema from './server/db/schema'
 
 const [firstMatch] = globSync('.wrangler/**/*D1DatabaseObject*/**/*.sqlite')
 console.log('sqlite file', firstMatch)
@@ -17,5 +18,29 @@ export const auth = betterAuth({
     schema,
   }),
 
-  ...DEFAULT_OPTIONS,
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: false,
+  },
+
+  plugins: [
+    apiKey(),
+    stripe({
+      stripeClient: new Stripe(process.env.STRIPE_SECRET_KEY!),
+      stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+      subscription: {
+        enabled: true,
+        plans: [
+          { name: 'starter', priceId: process.env.STRIPE_PRICE_STARTER! },
+          { name: 'pro', priceId: process.env.STRIPE_PRICE_PRO! },
+        ],
+      },
+    }),
+  ],
+
+  trustedOrigins: [
+    'http://localhost:3000',
+    'http://localhost:8787',
+    'https://*.meyer1994.workers.dev',
+  ],
 })

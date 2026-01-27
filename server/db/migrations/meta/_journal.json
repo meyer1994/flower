@@ -8,6 +8,13 @@
       "when": 1769461882072,
       "tag": "0000_high_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1769465246205,
+      "tag": "0001_unknown_lord_hawal",
+      "breakpoints": true
     }
   ]
 }

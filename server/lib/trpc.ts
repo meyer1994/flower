@@ -66,6 +66,7 @@ const logger = t.middleware(async ({ next, ctx }) => {
   const start = Date.now()
 
   const result = await next({ ctx })
+  if (!result.ok) console.error('[server.trpc] error', result)
 
   const duration = Date.now() - start
   console.info(`[server.trpc] end ${path} - ${duration}ms`)
