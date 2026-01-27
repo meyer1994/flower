@@ -1,40 +1,25 @@
 <script setup lang="ts">
-import type { AuthFormField, ButtonProps } from '@nuxt/ui'
+import type { AuthFormField, ButtonProps, FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
 
-const schemaEmail = z.object({
+const schema = z.object({
   email: z.email('Invalid email'),
-  name: z.string().optional(),
-  password: z.string('Password is required').min(6, 'Must be at least 6 characters'),
+  password: z.string('Password is required').min(8, 'Must be at least 8 characters'),
   remember: z.boolean().optional().default(false),
 })
 
-const schemaMagicLink = z.object({
-  email: z.email('Invalid email'),
-  name: z.string().optional(),
-})
-
-const schema = z.union([schemaEmail, schemaMagicLink])
+type Schema = z.output<typeof schema>
 
 const toast = useToast()
-const { client, loggedIn } = useAuth()
+const { client: auth, loggedIn } = useAuth()
 
-const type = ref<'email' | 'magic-link'>('email')
-
-const fieldsEmail: AuthFormField[] = [
+const fields: AuthFormField[] = [
   {
     name: 'email',
     label: 'Email',
     type: 'email',
     placeholder: 'Enter your email',
     required: true,
-  },
-  {
-    name: 'name',
-    label: 'Name',
-    type: 'text',
-    placeholder: 'Enter your name',
-    required: false,
   },
   {
     name: 'password',
@@ -51,91 +36,55 @@ const fieldsEmail: AuthFormField[] = [
   },
 ]
 
-const fieldsMagicLink: AuthFormField[] = [
-  {
-    name: 'email',
-    label: 'Email',
-    type: 'email',
-    placeholder: 'Enter your email',
-    required: true,
-  },
-  {
-    name: 'name',
-    label: 'Name',
-    type: 'text',
-    placeholder: 'Enter your name',
-    required: false,
-  },
-]
+const form = useTemplateRef('form')
 
-const providersDefault: ButtonProps[] = [
+const providers = computed<ButtonProps[]>(() => [
   {
     label: 'Google',
     icon: 'i-simple-icons-google',
     class: 'p-2',
-    onClick: async () => { toast.add({ title: 'Google', description: 'Sign up with Google' }) },
+    onClick: async () => { toast.add({ title: 'Google', description: 'Sign in with Google' }) },
   },
   {
     label: 'GitHub',
     icon: 'i-simple-icons-github',
     class: 'p-2',
-    onClick: async () => { toast.add({ title: 'GitHub', description: 'Sign up with GitHub' }) },
+    onClick: async () => { toast.add({ title: 'GitHub', description: 'Sign in with GitHub' }) },
   },
-]
-
-const providersEmail: ButtonProps[] = [
   {
-    label: 'Email',
-    icon: 'i-lucide-mail',
+    label: 'Magic Link',
+    icon: 'i-lucide-sparkles',
     class: 'p-2',
-    onClick: async () => { type.value = 'email' },
+    onClick: async () => {
+      const email = z.email().safeParse(form.value?.state.email)
+
+      if (!email.success) {
+        toast.add({
+          color: 'error',
+          title: 'Invalid Email',
+          description: 'Please enter a valid email address',
+        })
+        return
+      }
+
+      await auth.signIn.magicLink({ email: email.data, callbackURL: '/dash' })
+      toast.add({
+        title: 'Magic Link',
+        description: 'Check your email for a magic link',
+      })
+    },
   },
-  ...providersDefault,
-]
+])
 
-const providersMagicLink: ButtonProps[] = [
-  {
-    label: 'Email',
-    icon: 'i-lucide-mail',
-    class: 'p-2',
-    onClick: async () => { type.value = 'email' },
-  },
-  ...providersDefault,
-]
-
-const fields = computed<AuthFormField[]>(() => {
-  if (type.value === 'email') return fieldsEmail
-  if (type.value === 'magic-link') return fieldsMagicLink
-  return []
-})
-
-const providers = computed<ButtonProps[]>(() => {
-  if (type.value === 'email') return providersEmail
-  if (type.value === 'magic-link') return providersMagicLink
-  return []
-})
-
-const form = useTemplateRef('form')
-
-const onSubmit = async () => {
-  const isEmail = schemaEmail.safeParse(form.value?.state)
-  const isMagicLink = schemaMagicLink.safeParse(form.value?.state)
-
-  if (isEmail.success) {
-    await client.signUp.email({
-      name: isEmail.data.name ?? isEmail.data.email,
-      email: isEmail.data.email,
-      password: isEmail.data.password,
-    })
-  }
-
-  if (isMagicLink.success) {
-    await client.signIn.magicLink({
-      name: isMagicLink.data.name,
-      email: isMagicLink.data.email,
-    })
-    toast.add({ title: 'Magic Link', description: 'Check your email for a magic link' })
-  }
+const onSubmit = async (e: FormSubmitEvent<Schema>) => {
+  const response = await auth.signUp.email({
+    name: e.data.email,
+    email: e.data.email,
+    password: e.data.password,
+    callbackURL: '/dash',
+  })
+  if (response.error) throw response.error
+  await reloadNuxtApp({ path: '/dash' })
 }
 </script>
 
@@ -148,16 +97,12 @@ const onSubmit = async () => {
         <UAuthForm
           ref="form"
           :schema="schema"
-          title="Sign up"
+          title="Sign in"
           description="Enter your credentials to access your account."
           icon="i-lucide-user"
           :fields="fields"
           :providers="providers"
-          :submit="{
-            label: 'Sign up',
-            icon: 'i-lucide-user-plus',
-            onClick: async () => await onSubmit(),
-          }"
+          @submit="async (e: FormSubmitEvent<unknown>) => await onSubmit(e as FormSubmitEvent<Schema>)"
         />
       </UPageCard>
     </UContainer>

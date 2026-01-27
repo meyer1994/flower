@@ -1,26 +1,19 @@
 <script setup lang="ts">
-import type { AuthFormField, ButtonProps } from '@nuxt/ui'
+import type { AuthFormField, ButtonProps, FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
 
-const schemaEmail = z.object({
+const schema = z.object({
   email: z.email('Invalid email'),
   password: z.string('Password is required').min(8, 'Must be at least 8 characters'),
   remember: z.boolean().optional().default(false),
 })
 
-const schemaMagicLink = z.object({
-  email: z.email('Invalid email'),
-  name: z.string().optional(),
-})
-
-const schema = z.union([schemaEmail, schemaMagicLink])
+type Schema = z.output<typeof schema>
 
 const toast = useToast()
-const { client, loggedIn } = useAuth()
+const { client: auth, loggedIn } = useAuth()
 
-const type = ref<'email' | 'magic-link'>('email')
-
-const fieldsEmail: AuthFormField[] = [
+const fields: AuthFormField[] = [
   {
     name: 'email',
     label: 'Email',
@@ -43,24 +36,9 @@ const fieldsEmail: AuthFormField[] = [
   },
 ]
 
-const fieldsMagicLink: AuthFormField[] = [
-  {
-    name: 'email',
-    label: 'Email',
-    type: 'email',
-    placeholder: 'Enter your email',
-    required: true,
-  },
-  {
-    name: 'name',
-    label: 'Name',
-    type: 'text',
-    placeholder: 'Enter your name',
-    required: false,
-  },
-]
+const form = useTemplateRef('form')
 
-const providersDefault: ButtonProps[] = [
+const providers = computed<ButtonProps[]>(() => [
   {
     label: 'Google',
     icon: 'i-simple-icons-google',
@@ -73,61 +51,37 @@ const providersDefault: ButtonProps[] = [
     class: 'p-2',
     onClick: async () => { toast.add({ title: 'GitHub', description: 'Sign in with GitHub' }) },
   },
-]
-
-const providersEmail: ButtonProps[] = [
   {
     label: 'Magic Link',
     icon: 'i-lucide-sparkles',
     class: 'p-2',
-    onClick: async () => { type.value = 'magic-link' },
+    onClick: async () => {
+      const email = z.email().safeParse(form.value?.state.email)
+
+      if (!email.success) {
+        toast.add({
+          color: 'error',
+          title: 'Invalid Email',
+          description: 'Please enter a valid email address',
+        })
+        return
+      }
+
+      await auth.signIn.magicLink({ email: email.data, callbackURL: '/dash' })
+      toast.add({
+        title: 'Magic Link',
+        description: 'Check your email for a magic link',
+      })
+    },
   },
-  ...providersDefault,
-]
+])
 
-const providersMagicLink: ButtonProps[] = [
-  {
-    label: 'Email',
-    icon: 'i-lucide-mail',
-    class: 'p-2',
-    onClick: async () => { type.value = 'email' },
-  },
-  ...providersDefault,
-]
-
-const fields = computed<AuthFormField[]>(() => {
-  if (type.value === 'email') return fieldsEmail
-  if (type.value === 'magic-link') return fieldsMagicLink
-  return []
-})
-
-const providers = computed<ButtonProps[]>(() => {
-  if (type.value === 'email') return providersEmail
-  if (type.value === 'magic-link') return providersMagicLink
-  return []
-})
-
-const form = useTemplateRef('form')
-
-const onSubmit = async () => {
-  const isEmail = schemaEmail.safeParse(form.value?.state)
-  const isMagicLink = schemaMagicLink.safeParse(form.value?.state)
-
-  if (isEmail.success) {
-    await client.signIn.email({
-      email: isEmail.data.email,
-      password: isEmail.data.password,
-      rememberMe: isEmail.data.remember,
-    })
-  }
-
-  if (isMagicLink.success) {
-    await client.signIn.magicLink({
-      name: isMagicLink.data.name,
-      email: isMagicLink.data.email,
-    })
-    toast.add({ title: 'Magic Link', description: 'Check your email for a magic link' })
-  }
+const onSubmit = async (e: FormSubmitEvent<Schema>) => {
+  await auth.signIn.email({
+    email: e.data.email,
+    password: e.data.password,
+    callbackURL: '/dash',
+  })
 }
 </script>
 
@@ -145,11 +99,7 @@ const onSubmit = async () => {
           icon="i-lucide-user"
           :fields="fields"
           :providers="providers"
-          :submit="{
-            label: 'Sign in',
-            icon: 'i-lucide-log-in',
-            onClick: async () => await onSubmit(),
-          }"
+          @submit="async (e: FormSubmitEvent<unknown>) => await onSubmit(e as FormSubmitEvent<Schema>)"
         />
       </UPageCard>
     </UContainer>
