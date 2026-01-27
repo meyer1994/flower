@@ -22,9 +22,11 @@ const { data: subscriptions, status, refresh } = await useAsyncData(
       <UPricingPlan
         title="Starter"
         price="$10/mo"
+        description="For small teams and projects"
         :button="{
-          label: 'Current Plan',
+          label: 'Starter Plan',
           color: 'neutral',
+          icon: 'i-lucide-rocket',
           onClick: async () => {
             const { data, error } = await auth.subscription.upgrade({
               plan: 'starter',
@@ -42,9 +44,11 @@ const { data: subscriptions, status, refresh } = await useAsyncData(
       <UPricingPlan
         title="Pro"
         price="$100/mo"
+        description="For large teams and projects"
         :button="{
-          label: 'Upgrade to Pro',
+          label: 'Pro Plan',
           color: 'primary',
+          icon: 'i-lucide-crown',
           onClick: async () => {
             const { data, error } = await auth.subscription.upgrade({
               plan: 'pro',

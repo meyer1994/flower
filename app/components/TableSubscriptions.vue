@@ -114,7 +114,7 @@ function getStatusColor(status: string | null): 'success' | 'warning' | 'error' 
 
 <template>
   <div class="flex flex-col flex-1 w-full">
-    <div class="flex items-center gap-2 px-4 py-3.5 border-b border-accented">
+    <div class="flex items-center gap-2 py-3.5 border-b border-accented">
       <UButton
         icon="i-lucide-refresh-cw"
         color="neutral"

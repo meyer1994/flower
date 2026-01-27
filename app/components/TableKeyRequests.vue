@@ -96,7 +96,7 @@ function getStatusColor(status: number) {
 
 <template>
   <div class="flex flex-col flex-1 w-full">
-    <div class="flex items-center gap-2 px-4 py-3.5 border-b border-accented">
+    <div class="flex items-center gap-2 py-3.5 border-b border-accented">
       <span class="text-sm font-medium">Request History</span>
 
       <UButton

@@ -26,7 +26,7 @@ const profileItems: DropdownMenuItem[][] = [
     },
     {
       label: 'Portal',
-      icon: 'i-lucide-credit-card',
+      icon: 'i-lucide-external-link',
       onSelect: async () => {
         const { data, error } = await auth.subscription.billingPortal()
         if (error) throw error
