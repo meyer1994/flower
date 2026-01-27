@@ -17,6 +17,8 @@ export const serverEmail = (event: H3Event) => {
     url,
     key: apiKey,
     username: 'api',
+    // needed to work on cloudflare workers
+    // https://github.com/mailgun/mailgun.js/issues/341#issuecomment-3467026163
     useFetch: true,
   })
 
