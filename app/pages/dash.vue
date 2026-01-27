@@ -3,7 +3,6 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 
 definePageMeta({ auth: true })
 
-const { $trpc } = useNuxtApp()
 const { user, signOut, client: auth } = useAuth()
 
 const profileItems: DropdownMenuItem[][] = [

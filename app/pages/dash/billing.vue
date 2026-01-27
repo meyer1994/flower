@@ -3,27 +3,25 @@ definePageMeta({ auth: true })
 
 const url = useRequestURL()
 const { user, client: auth } = useAuth()
+
+const { data: subscriptions, status, refresh } = await useAsyncData(
+  'subscriptions',
+  async () => await auth.subscription.list(),
+)
 </script>
 
 <template>
   <UCard>
     <template #header>
       <h2 class="text-2xl font-bold">
-        Choose Your Plan
+        {{ subscriptions?.data?.length === 0 ? 'Choose Your Plan' : 'Your Plans' }}
       </h2>
     </template>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <UPricingPlan
-        :title="'Starter'"
-        :price="'$0/mo'"
-        description="Get started with Flower. 20MB free uploads, fast AI search, and cloud sync."
-        :features="[
-          '20MB total uploads',
-          'AI-powered search',
-          'Cloud storage',
-          'Community support',
-        ]"
+        title="Starter"
+        price="$10/mo"
         :button="{
           label: 'Current Plan',
           color: 'neutral',
@@ -42,12 +40,8 @@ const { user, client: auth } = useAuth()
       />
 
       <UPricingPlan
-        :title="'Pro'"
-        :price="'$9/mo'"
-        description="Unlock bigger uploads, priority processing, and premium features."
-        :features="[
-          '',
-        ]"
+        title="Pro"
+        price="$100/mo"
         :button="{
           label: 'Upgrade to Pro',
           color: 'primary',
@@ -62,6 +56,23 @@ const { user, client: auth } = useAuth()
             if (error) throw error
             await navigateTo(data.url, { external: true })
           },
+        }"
+      />
+
+      <TableSubscriptions
+        class="col-span-1 md:col-span-2"
+        :items="subscriptions?.data ?? []"
+        :loading="status === 'pending'"
+        @refresh-table="async () => {
+          await refresh()
+        }"
+        @cancel-item="async (e) => {
+          await auth.subscription.cancel({
+            returnUrl: url.href,
+            referenceId: e.referenceId,
+            subscriptionId: e.subscriptionId,
+          })
+          await refresh()
         }"
       />
     </div>
