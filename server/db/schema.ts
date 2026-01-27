@@ -1,5 +1,5 @@
-import { sql } from 'drizzle-orm'
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { desc, sql } from 'drizzle-orm'
+import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import * as auth from './auth'
 
 export * from './auth'
@@ -20,7 +20,12 @@ export const TItems = sqliteTable('items', {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`)
     .$onUpdateFn(() => sql`CURRENT_TIMESTAMP`),
-})
+},
+table => [
+  index('items_user_id_idx').on(table.userId),
+  index('items_created_at_idx').on(desc(table.createdAt)),
+  index('items_updated_at_idx').on(desc(table.updatedAt)),
+])
 
 export const TTasks = sqliteTable('tasks', {
   id: text('id')
@@ -42,4 +47,10 @@ export const TTasks = sqliteTable('tasks', {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`)
     .$onUpdateFn(() => sql`CURRENT_TIMESTAMP`),
-})
+},
+table => [
+  index('tasks_status_idx').on(table.status),
+  index('tasks_user_id_idx').on(table.userId),
+  index('tasks_created_at_idx').on(desc(table.createdAt)),
+  index('tasks_updated_at_idx').on(desc(table.updatedAt)),
+])
