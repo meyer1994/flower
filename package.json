@@ -26,6 +26,7 @@
     "@aws-sdk/lib-storage": "^3.974.0",
     "@aws-sdk/s3-request-presigner": "^3.974.0",
     "@better-auth/stripe": "^1.4.17",
+    "@iconify-json/simple-icons": "^1.2.68",
     "@langchain/cloudflare": "^1.0.1",
     "@langchain/core": "^1.1.16",
     "@nuxt/eslint": "1.12.1",
@@ -37,6 +38,7 @@
     "@vueuse/nuxt": "^14.1.0",
     "better-auth": "^1.4.17",
     "drizzle-orm": "^0.45.1",
+    "mailgun.js": "^12.7.0",
     "nuxt": "^4.3.0",
     "stripe": "^20.2.0",
     "trpc-nuxt": "^2.0.1",
@@ -47,6 +49,7 @@
   "devDependencies": {
     "@better-auth/cli": "^1.4.17",
     "@iconify-json/lucide": "^1.2.86",
+    "@types/mailgun-js": "^0.22.19",
     "@types/node": "^25.0.10",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.8",

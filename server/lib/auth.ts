@@ -2,11 +2,12 @@ import { stripe } from '@better-auth/stripe'
 import type { SecondaryStorage } from 'better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { apiKey } from 'better-auth/plugins'
+import { apiKey, magicLink } from 'better-auth/plugins'
 import type { H3Event } from 'h3'
 import type Stripe from 'stripe'
 import * as schema from '../db/schema'
 import { serverDrizzle } from './drizzle'
+import { serverEmail } from './email'
 import { serverStripe } from './stripe'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,7 +59,10 @@ const createStripe = (client: Stripe, env: Env) => stripe({
 })
 
 export const serverAuth = (event: H3Event) => {
+  const env = event.context.cloudflare.env as unknown as Env
+
   const db = serverDrizzle(event)
+  const mailgun = serverEmail(event)
   const stripe = serverStripe(event)
 
   const auth = betterAuth({
@@ -75,7 +79,15 @@ export const serverAuth = (event: H3Event) => {
 
     plugins: [
       apiKey(),
-      createStripe(stripe, event.context.cloudflare.env as unknown as Env),
+      createStripe(stripe, env),
+      magicLink({
+        sendMagicLink: async (email) => {
+          await mailgun.send({
+            to: email.email,
+            text: `Click here to login: ${email.url}`,
+          })
+        },
+      }),
     ],
 
     trustedOrigins: [

@@ -110,9 +110,20 @@ const itemsDemo: NavigationMenuItem[] = [
           :block="collapsed"
         >
           <UButton
+            v-if="collapsed"
             icon="i-lucide-user"
-            :label="collapsed ? undefined : user?.name ?? 'Profile'"
             color="neutral"
+            :title="JSON.stringify(user, null, 2)"
+            variant="ghost"
+            class="w-full"
+            aria-label="Profile menu"
+          />
+          <UButton
+            v-else
+            :label="user?.name ? user.name : user?.email ? user.email : 'NA'"
+            icon="i-lucide-user"
+            color="neutral"
+            :title="JSON.stringify(user, null, 2)"
             variant="ghost"
             class="w-full"
             aria-label="Profile menu"

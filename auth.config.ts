@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { apiKey, stripe } from 'better-auth/plugins'
+import { stripe } from '@better-auth/stripe'
+import { apiKey, magicLink } from 'better-auth/plugins'
 import { drizzle } from 'drizzle-orm/sql-js'
 import { globSync } from 'node:fs'
 import * as pathLib from 'node:path'
@@ -36,6 +37,7 @@ export const auth = betterAuth({
         ],
       },
     }),
+    magicLink(),
   ],
 
   trustedOrigins: [
