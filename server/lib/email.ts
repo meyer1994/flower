@@ -13,7 +13,12 @@ export const serverEmail = (event: H3Event) => {
   if (!domain) throw new Error('MAILGUN_DOMAIN not found')
 
   const mailgun = new Mailgun(FormData)
-  const client = mailgun.client({ username: 'api', key: apiKey, url })
+  const client = mailgun.client({
+    url,
+    key: apiKey,
+    username: 'api',
+    useFetch: true,
+  })
 
   type Params = { text: string, to: string }
 

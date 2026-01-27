@@ -37,7 +37,9 @@ export const auth = betterAuth({
         ],
       },
     }),
-    magicLink(),
+    magicLink({
+      sendMagicLink: async () => {},
+    }),
   ],
 
   trustedOrigins: [
