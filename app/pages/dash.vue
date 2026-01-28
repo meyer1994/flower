@@ -53,6 +53,11 @@ const itemsDemo: NavigationMenuItem[] = [
     to: '/dash/demo',
   },
   {
+    label: 'Organizations',
+    icon: 'i-lucide-building-2',
+    to: '/dash/orgs',
+  },
+  {
     label: 'API Keys',
     icon: 'i-lucide-key',
     to: '/dash/keys',

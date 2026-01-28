@@ -13,12 +13,12 @@ const [
 
 if (errorItems.value) throw createError({
   status: errorItems.value.data?.httpStatus,
-  statusMessage: JSON.stringify(errorItems.value.data),
+  message: JSON.stringify(errorItems.value.data),
 })
 
 if (errorFiles.value) throw createError({
   status: errorFiles.value.data?.httpStatus,
-  statusMessage: JSON.stringify(errorFiles.value.data),
+  message: JSON.stringify(errorFiles.value.data),
 })
 
 const onSubmitFile = async (e: File) => {

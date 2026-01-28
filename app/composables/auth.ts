@@ -1,5 +1,5 @@
 import { stripeClient } from '@better-auth/stripe/client'
-import { apiKeyClient, magicLinkClient } from 'better-auth/client/plugins'
+import { apiKeyClient, magicLinkClient, organizationClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/vue'
 
 export function useAuth() {
@@ -10,6 +10,7 @@ export function useAuth() {
     baseURL: url.origin,
     fetchOptions: { headers },
     plugins: [
+      organizationClient(),
       apiKeyClient(),
       stripeClient({ subscription: true }),
       magicLinkClient(),

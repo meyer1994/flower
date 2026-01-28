@@ -62,6 +62,47 @@ definePageMeta({ auth: true }); // protects the route
 If the user is not logged in, they will be redirected to a 404 page. As it is
 currently configured, we refresh the session on every route navigation.
 
+#### Organizations
+
+This app includes the Better Auth [organization plugin](https://www.better-auth.com/docs/plugins/organization)
+for multi-tenant support. Organizations allow users to collaborate in shared
+workspaces with role-based access control (owner, admin, member).
+
+##### Organization Invitation Flow
+
+The following diagram illustrates how organization invitations work:
+
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant Server
+    participant User
+
+    Admin->>Server: inviteMember(email, role)
+    Server->>Server: Store invitation (status: pending)
+    Server->>User: sendInvitationEmail()<br/>Link: /invitation?id=xxx
+
+    User->>Server: Click invitation link
+    Server->>Server: Auth middleware checks login
+
+    alt Not logged in
+        Server-->>User: Redirect to login
+        User->>Server: Login
+    end
+
+    User->>Server: acceptInvitation(id)
+    Server->>Server: Validate invitation<br/>(expiration, status, email)
+    Server->>Server: Add user as member
+    Server-->>User: Success response
+    Note over User: User is now a member<br/>of the organization
+```
+
+**Key files:**
+
+- `server/lib/auth.ts` - Server-side auth configuration with `sendInvitationEmail`
+- `app/pages/invitation.vue` - Invitation acceptance page
+- `app/pages/dash/orgs.vue` - Organization management UI
+
 ### API Keys
 
 Users can create and manage API keys for programmatic access via the `/keys`

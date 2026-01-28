@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { stripe } from '@better-auth/stripe'
-import { apiKey, magicLink } from 'better-auth/plugins'
+import { apiKey, magicLink, organization } from 'better-auth/plugins'
 import { drizzle } from 'drizzle-orm/sql-js'
 import { globSync } from 'node:fs'
 import * as pathLib from 'node:path'
@@ -26,6 +26,7 @@ export const auth = betterAuth({
 
   plugins: [
     apiKey(),
+    organization(),
     stripe({
       stripeClient: new Stripe(process.env.STRIPE_SECRET_KEY!),
       stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,

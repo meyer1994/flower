@@ -2,7 +2,7 @@ import { stripe } from '@better-auth/stripe'
 import type { SecondaryStorage } from 'better-auth'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { apiKey, magicLink } from 'better-auth/plugins'
+import { apiKey, magicLink, organization } from 'better-auth/plugins'
 import type { H3Event } from 'h3'
 import type Stripe from 'stripe'
 import * as schema from '../db/schema'
@@ -72,20 +72,45 @@ export const serverAuth = (event: H3Event) => {
       schema,
     }),
 
+    advanced: {
+      disableOriginCheck: import.meta.dev,
+    },
+
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
     },
 
     plugins: [
+      organization({
+        async sendInvitationEmail(data, request) {
+          const url = new URL(request?.url || 'http://localhost:3000')
+          try {
+            await mailgun.send({
+              to: data.email,
+              text: `You have been invited to join ${data.organization.name}. Click here to accept: ${url.origin}/invitation?id=${data.id}`,
+            })
+          }
+          catch (error) {
+            console.error('[server.auth.sendInvitationEmail] error', error)
+            throw error
+          }
+        },
+      }),
       apiKey(),
       createStripe(stripe, env),
       magicLink({
         sendMagicLink: async (email) => {
-          await mailgun.send({
-            to: email.email,
-            text: `Click here to login: ${email.url}`,
-          })
+          try {
+            await mailgun.send({
+              to: email.email,
+              text: `Click here to login: ${email.url}`,
+            })
+          }
+          catch (error) {
+            console.error('[server.auth.sendMagicLink] error', error)
+            throw error
+          }
         },
       }),
     ],
