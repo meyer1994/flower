@@ -49,3 +49,7 @@ export function useAuth() {
     apiKey: client.apiKey,
   }
 }
+
+type AuthAPI = ReturnType<typeof useAuth>['client']
+const _item: AuthAPI = {} as AuthAPI
+export const $Infer = _item.$Infer

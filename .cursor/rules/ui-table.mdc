@@ -33,36 +33,32 @@ const emit = defineEmits<{
 
 type Keys = keyof Item | "actions";
 
-// ALWAYS use the slot: 'slot' as const pattern for column IDs
+// ALWAYS use the id: 'id' as const pattern for column IDs
 const columns: TableColumn<Item>[] = [
   {
     id: "id" as const,
-    slot: "id" as const,
     accessorKey: "id",
     header: "ID",
   },
   {
     id: "parentId" as const,
-    slot: "parentId" as const,
     accessorKey: "parentId",
     header: "Parent ID",
   },
   {
     id: "createdAt" as const,
-    slot: "createdAt" as const,
     accessorKey: "createdAt",
     header: "Created At",
   },
   {
     id: "actions" as const,
-    slot: "actions" as const,
     header: "Actions",
   },
 ];
 
 // Create MAP_ID_TO_LABEL for dropdown menu labels
 const MAP_ID_TO_LABEL: Record<Keys, string> = columns.reduce(
-  (a, c) => ({ ...a, [c.id]: c.header }),
+  (a, c) => ({ ...a, [c.id as Keys]: c.header }),
   {},
 );
 
@@ -131,13 +127,13 @@ const table = useTemplateRef("table");
       :sticky="true"
       :empty-state="{
         icon: 'i-lucide-box',
-        label: 'Nenhum item encontrado',
+        label: 'No items found',
       }"
       :ui="{
         tr: 'hover:bg-muted cursor-pointer',
       }"
       class="flex-1"
-      @select="(e) => emit('select-item', e.original)"
+      @select="(e, row) => emit('select-item', row.original)"
     >
       <!-- Prefer template slots (#columnId-cell) for complex cell content -->
       <template #id-cell="{ row }">
@@ -163,7 +159,7 @@ const table = useTemplateRef("table");
             color="error"
             variant="ghost"
             size="sm"
-            @click="emit('delete-item', row.original)"
+            @click="() => emit('delete-item', row.original)"
           />
         </div>
       </template>
@@ -189,6 +185,12 @@ const { data, status } = await useAsyncData(
 </script>
 
 <template>
-  <TableItems :items="data || []" :loading="status === 'pending'" />
+  <TableItems
+    :items="data || []"
+    :loading="status === 'pending'"
+    @select-item="(e) => console.log(e)"
+    @delete-item="(e) => console.log(e)"
+    @refresh-table="() => console.log('refresh')"
+  />
 </template>
 ```
