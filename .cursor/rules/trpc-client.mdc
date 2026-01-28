@@ -2,176 +2,138 @@
 globs: app/**/*.vue,app/**/*.ts
 ---
 
-# tRPC Client Usage Guide
+From the user input, and using the guide below, you will implement tRPC client
+calls in Vue components.
 
-Core patterns for using tRPC client methods in Vue components, prioritizing
-`useAsyncData` for both queries and mutations to ensure consistent SSR and state
-management.
+# Hands on guide
 
-## Client Access
-
-```vue
-<script setup lang="ts">
-const { $trpc } = useNuxtApp();
-</script>
-```
-
-## Data Fetching (Queries)
-
-Always use `useAsyncData` for data fetching to benefit from Nuxt's SSR, caching,
-and state management.
-
-### Basic Query
+Below is a hands on guide on the patterns used in this project to use tRPC
+client methods in Vue components.
 
 ```vue
 <script setup lang="ts">
+// trpc client is available in the app via useNuxtApp()
 const { $trpc } = useNuxtApp();
 
+// ALWAYS use useAsyncData for data fetching to benefit from Nuxt's SSR,
+// caching, and state management
+// returns: data, status, error, refresh
 const { data, status, error, refresh } = await useAsyncData(
-  "unique-key",
-  async () => await $trpc.process.list.query(),
+  "unique-key", // unique key for caching and deduplication
+  async () => await $trpc.items.list.query(),
 );
-</script>
-```
 
-### Reactive Queries (with parameters)
-
-Use `watch` or `computed` keys to automatically re-fetch when parameters change.
-
-```vue
-<script setup lang="ts">
-const { $trpc } = useNuxtApp();
-
-const processId = ref("uuid-here");
-
-const { data: files } = await useAsyncData(
-  () => `files-${processId.value}`,
-  async () => await $trpc.files.list.query({ processId: processId.value }),
-  { watch: [processId] },
+// you can use dynamic keys to fetch data based on reactive values (e.g. route
+// params). this will trigger a re-fetch when the value changes
+const route = useRoute();
+const { data: item } = await useAsyncData(
+  () => `item-${route.params.id}`, // dynamic key triggers re-fetch on change
+  async () => await $trpc.items.get.query({ id: route.params.id }),
 );
-</script>
-```
 
-### Parallel Queries
-
-```vue
-<script setup lang="ts">
-const { $trpc } = useNuxtApp();
-
+// use Promise.all to fetch multiple queries in parallel. this makes the pages
+// load way faster and makes use of trpc batching
 const [
+  { data: items, refresh: refreshItems },
   { data: files, refresh: refreshFiles },
-  { data: notes, refresh: refreshNotes },
 ] = await Promise.all([
+  useAsyncData("items", async () => await $trpc.items.list.query()),
   useAsyncData("files", async () => await $trpc.files.list.query()),
-  useAsyncData("notes", async () => await $trpc.notes.list.query()),
 ]);
 </script>
 ```
 
-## Data Modification (Mutations)
+## Mutations
 
-Use `useAsyncData` with `immediate: false` for mutations to manage loading
-states and errors consistently.
-
-### Basic Mutation
+For mutations (create, update, delete), use direct `$trpc.*.mutate()` calls
+inside handler functions. This keeps the code simple and avoids unnecessary
+complexity.
 
 ```vue
 <script setup lang="ts">
 const { $trpc } = useNuxtApp();
 
-const { execute: createProcess, status } = await useAsyncData(
-  async () => await $trpc.process.create.mutate({ name: "New Process" }),
-  { immediate: false },
+// fetch data with useAsyncData (as shown above)
+const { data: items, refresh: refreshItems } = await useAsyncData(
+  "items",
+  async () => await $trpc.items.list.query(),
 );
 
-const isCreating = computed(() => status.value === "pending");
-
-const handleSubmit = async () => {
-  await createProcess();
+// prefer using async functions over const functions, because they can be
+// referenced above in the code, while const functions must be already defined
+async function onCreateItem(data: { name: string }) {
+  // call mutate directly - simple and straightforward
+  await $trpc.items.create.mutate(data);
   // refresh related queries after success
-};
+  await refreshItems();
+}
+
+async function onUpdateItem(id: string, data: { name: string }) {
+  await $trpc.items.update.mutate({ id, ...data });
+  await refreshItems();
+}
+
+async function onDeleteItem(id: string) {
+  await $trpc.items.delete.mutate({ id });
+  await refreshItems();
+}
 </script>
+
+<template>
+  <!-- use loading state from the form component itself (see ui-form.mdc) -->
+  <FormItem @submit="async (e) => await onCreateItem(e.data)" />
+
+  <div v-for="item in items" :key="item.id">
+    {{ item.name }}
+    <UButton @click="onDeleteItem(item.id)">Delete</UButton>
+  </div>
+</template>
 ```
 
-### Mutation with Dynamic Data
+## When to use each method
 
-For forms, you can pass the data directly in the `execute` call if structured
-correctly, or use a closure.
+| Method           | Use Case                   | Features                           |
+| :--------------- | :------------------------- | :--------------------------------- |
+| `useAsyncData`   | Data fetching (queries)    | SSR, Caching, Reactive (via watch) |
+| `$trpc.*.mutate` | Mutations in handlers      | Simple, direct, no overhead        |
+| `$trpc.*.query`  | One-off, non-reactive call | Simple scripts, utilities          |
+
+## Complete example
+
+A full page example combining queries and mutations.
 
 ```vue
 <script setup lang="ts">
-const { $trpc } = useNuxtApp();
-const formData = reactive({ name: "" });
+import type { FormItemData } from "~~/components/FormItem.vue";
 
-const { execute: submitForm, status } = await useAsyncData(
-  async () => await $trpc.process.create.mutate(formData),
-  { immediate: false },
-);
-
-const handleSubmit = async () => {
-  await submitForm();
-};
-</script>
-```
-
-## When to Use Each Method
-
-| Method                    | Use Case                    | Features                            |
-| :------------------------ | :-------------------------- | :---------------------------------- |
-| `useAsyncData` (Query)    | Standard data fetching      | SSR, Caching, Reactive (via watch)  |
-| `useAsyncData` (Mutation) | Form submissions / Actions  | Consistent status tracking, No SSR  |
-| `$trpc.*.query()`         | One-off, non-reactive calls | Simple scripts, non-component logic |
-| `$trpc.*.mutate()`        | Simple fire-and-forget      | Background tasks, simple deletes    |
-
-## Complete Example
-
-```vue
-<script setup lang="ts">
 const { $trpc } = useNuxtApp();
 
-// Query: Fetch processes
-const { data: processes, refresh } = await useAsyncData(
-  "processes",
-  async () => await $trpc.process.list.query(),
+// queries: fetch data with useAsyncData
+const { data: items, refresh: refreshItems } = await useAsyncData(
+  "items",
+  async () => await $trpc.items.list.query(),
 );
 
-// Mutation: Create process
-const form = reactive({ name: "" });
-const { execute: createProcess, status: createStatus } = await useAsyncData(
-  async () => await $trpc.process.create.mutate(form),
-  { immediate: false },
-);
+// mutations: simple async functions that call mutate directly
+async function onSubmit(data: FormItemData) {
+  await $trpc.items.create.mutate(data);
+  await refreshItems();
+}
 
-// Mutation: Delete process
-const { execute: deleteProcess } = await useAsyncData(
-  async (id: string) => await $trpc.process.delete.mutate({ id }),
-  { immediate: false },
-);
-
-const handleSubmit = async () => {
-  await createProcess();
-  await refresh();
-  form.name = "";
-};
-
-const handleDelete = async (id: string) => {
-  await deleteProcess(id);
-  await refresh();
-};
+async function onDelete(id: string) {
+  await $trpc.items.delete.mutate({ id });
+  await refreshItems();
+}
 </script>
 
 <template>
   <div>
-    <UForm :state="form" @submit="handleSubmit">
-      <UInput v-model="form.name" />
-      <UButton type="submit" :loading="createStatus === 'pending'">
-        Create
-      </UButton>
-    </UForm>
+    <!-- form handles its own loading state via @submit event -->
+    <FormItem @submit="async (e) => await onSubmit(e.data)" />
 
-    <div v-for="p in processes" :key="p.id">
-      {{ p.name }}
-      <UButton @click="handleDelete(p.id)">Delete</UButton>
+    <div v-for="item in items" :key="item.id">
+      {{ item.name }}
+      <UButton @click="onDelete(item.id)">Delete</UButton>
     </div>
   </div>
 </template>

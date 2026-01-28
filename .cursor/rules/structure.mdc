@@ -4,7 +4,8 @@ alwaysApply: true
 
 # Flower Project Structure & Conventions
 
-This is a Vue 3 + Nuxt 4 + Nuxt UI 4 application with AI/LangChain integration for document processing.
+This is a Vue 3 + Nuxt 4 + Nuxt UI 4 application with AI/LangChain integration
+for document processing.
 
 ## Key Technologies
 
@@ -12,7 +13,8 @@ This is a Vue 3 + Nuxt 4 + Nuxt UI 4 application with AI/LangChain integration f
 - **Backend**: tRPC + Drizzle ORM (Cloudflare D1/SQLite) + H3
 - **AI**: LangChain + Langgraph + Cloudflare Workers AI
 - **Auth**: Better Auth
-- **Storage**: Cloudflare R2 (S3 Compatible), Cloudflare KV, Cloudflare Vectorize
+- **Storage**: Cloudflare R2 (S3 Compatible), Cloudflare KV, Cloudflare
+  Vectorize
 - **Queue**: Cloudflare Queues
 - **Package Manager**: pnpm
 
@@ -44,9 +46,12 @@ This is a Vue 3 + Nuxt 4 + Nuxt UI 4 application with AI/LangChain integration f
 
 ## Coding Style & Patterns
 
-- **Formatting**: ESLint Stylistic (no semicolons, trailing commas, 100 character line limit).
-- **TypeScript**: Strict mode enabled. Use `type` for definitions, `interface` only when necessary.
+- **Formatting**: ESLint Stylistic (no semicolons, trailing commas, 100
+  character line limit).
+- **TypeScript**: Strict mode enabled. Use `type` for definitions, `interface`
+  only when necessary.
 - **Components**: Use `<script setup lang="ts">`. Follow Nuxt UI 4 patterns.
-- **State**: Use `ref()` and `reactive()` from Vue. Use `useVueUse()` where appropriate.
+- **State**: Use `ref()` and `reactive()` from Vue. Use `useVueUse()` where
+  appropriate.
 - **Database**: Use Drizzle ORM with `ctx.db` in tRPC procedures.
 - **Data Fetching**: Prefer page-level fetching with `useAsyncData` and `$trpc`.

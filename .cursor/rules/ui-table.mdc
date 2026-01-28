@@ -172,18 +172,23 @@ const table = useTemplateRef("table");
 </template>
 ```
 
-## Key Guidelines
+## Usage
 
-- Always type your data with TypeScript interfaces
-- **Prefer template slots (`#columnId-cell`) for complex cell content** over `h()` function
-- Use `h()` function only when needed for dynamic column definitions
-- Use `useTemplateRef('table')` to access table API for column visibility and other operations
-- Use `v-model:column-visibility` with typed ref for column visibility control
-- Create `MAP_ID_TO_LABEL` for dropdown menu labels
-- Use `id: 'columnId' as const` pattern for column IDs
-- Use `<NuxtTime>` component for date formatting
-- Common props: `sticky`, `loading`, `loading-animation`, `filter`, `global-filter`, `class="flex-1"`
-- Use `:empty-state` prop for custom empty state messages
-- Use `:ui` prop for custom table styling (e.g., hover effects)
-- Use `@select` event for row click handling
-- Emit events from component for parent handling (`update-item`, `delete-item`, `select-item`, `refresh-table`)
+```vue
+<script setup lang="ts">
+import type { AppRouterOutputs } from "@@/server/trpc";
+import type { TableColumn } from "@nuxt/ui";
+
+type Item = AppRouterOutputs["node"]["list"][number];
+
+const { $trpc } = useNuxtApp();
+const { data, status } = await useAsyncData(
+  "items",
+  async () => await $trpc.node.list.query(),
+);
+</script>
+
+<template>
+  <TableItems :items="data || []" :loading="status === 'pending'" />
+</template>
+```

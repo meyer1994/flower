@@ -51,9 +51,9 @@ const emits = defineEmits<{ submit: [e: Schema] }>();
   <UForm
     :schema="schema"
     :state="state"
-    :loading="loading"
     class="flex flex-col gap-4"
     @submit.prevent="(e) => emits('submit', e.data)"
+    #default="{ loading, errors }"
   >
     <UFormField name="name" label="Name" description="Enter your name">
       <UInput
@@ -79,23 +79,20 @@ const emits = defineEmits<{ submit: [e: Schema] }>();
 </template>
 ```
 
-## Key Guidelines
+## Usage
 
-- Always use TypeScript with `z.output<typeof schema>` for type safety
-- Use `reactive<Partial<Schema>>({})` for form state
-- Use `withDefaults` for props with default values
-- Export form data type: `export type FormData = Schema`
-- Initialize state from props: `name: props.defaultValue?.name ?? ''`
-- Use `watch` to sync props changes to state: `watch(() => props.defaultValue, v
-=> v && Object.assign(state, v))`
-- Use `@submit.prevent` with direct emit: `@submit.prevent="(e) =>
-emits('submit', e.data)"`
-- Use `class="flex flex-col gap-4"` for form layout
-- Use `description` prop on `UFormField` for help text
-- Use slots for submit button customization: `<slot name="submit-button">`
-- Use `defineEmits<{ submit: [e: Schema] }>()` for simple emit patterns
-- Handle form submission with `FormSubmitEvent<Schema>` when using handler
-  functions
-- Access form methods via template refs: `const form = useTemplateRef('form')`
-- Common validation: `validate-on` prop controls when validation triggers
-- Error handling: Listen to `@error` event for custom error handling
+```vue
+<script setup lang="ts">
+import type { FormUserData } from "~~/components/FormUser.vue";
+
+const { $trpc } = useNuxtApp();
+
+async function onSubmit(data: FormUserData) {
+  await $trpc.user.create.mutate(data);
+}
+</script>
+
+<template>
+  <FormUser @submit="onSubmit" />
+</template>
+```
