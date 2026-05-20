@@ -1,4 +1,6 @@
-import { defineConfig } from 'drizzle-kit'
+import {
+  defineConfig,
+} from 'drizzle-kit'
 
 export default defineConfig({
   strict: true,
@@ -6,7 +8,7 @@ export default defineConfig({
   dialect: 'sqlite',
   schema: './server/db/schema.ts',
   out: './server/db/migrations',
-  dbCredentials: {
-    url: process.env.DATABASE_URL as string,
-  },
+  // we dont need the dbCredentials here because the migrations are handled by
+  // `wrangler d1 migrations apply`
+  // dbCredentials: { url: process.env.DATABASE_URL },
 })

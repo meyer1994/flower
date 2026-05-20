@@ -4,34 +4,14 @@ export default defineNuxtConfig({
 
   devtools: {
     enabled: false,
-    timeline: {
-      enabled: true,
-    },
+    timeline: { enabled: true },
   },
 
   css: ['~/assets/css/main.css'],
 
-  runtimeConfig: {
-    files: {
-      type: process.env.NUXT_FILES_TYPE || 's3' as 's3' | 'r2' | undefined,
-      s3: {
-        bucket: process.env.NUXT_FILES_AWS_BUCKET,
-        endpoint: process.env.NUXT_FILES_AWS_ENDPOINT,
-        accessKeyId: process.env.NUXT_FILES_AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.NUXT_FILES_AWS_SECRET_ACCESS_KEY,
-        region: process.env.NUXT_FILES_AWS_REGION,
-      },
-    },
-    database: {
-      url: process.env.DATABASE_URL,
-    },
-  },
+  build: { transpile: ['trpc-nuxt'] },
 
-  build: {
-    transpile: ['trpc-nuxt'],
-  },
-
-  compatibilityDate: '2025-11-01',
+  compatibilityDate: '2026-05-19',
 
   nitro: {
     preset: 'cloudflare_module',
@@ -39,15 +19,6 @@ export default defineNuxtConfig({
     cloudflare: {
       deployConfig: true,
       nodeCompat: true,
-    },
-
-    database: {
-      default: {
-        connector: 'cloudflare-d1',
-        options: {
-          databaseURL: process.env.DATABASE_URL,
-        },
-      },
     },
   },
 

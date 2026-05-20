@@ -1,17 +1,11 @@
-import { sql } from 'drizzle-orm'
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
-export const TUsers = sqliteTable('users', {
+export * from './auth'
+
+export const TCounter = sqliteTable('counter', {
   id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text('name')
-    .notNull(),
-  createdAt: text('created_at')
+    .primaryKey(),
+  count: integer('count')
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at')
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`)
-    .$onUpdateFn(() => sql`CURRENT_TIMESTAMP`),
+    .default(0),
 })

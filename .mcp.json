@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "nuxt-ui": {
+      "type": "http",
+      "url": "https://ui.nuxt.com/mcp"
+    },
+    "nuxt": {
+      "type": "http",
+      "url": "https://nuxt.com/mcp"
+    },
+    "trpc-nuxt": {
+      "type": "http",
+      "url": "https://gitmcp.io/wobsoriano/trpc-nuxt"
+    },
+    "better-auth": {
+      "type": "http",
+      "url": "https://gitmcp.io/better-auth/better-auth"
+    },
+    "drizzle-orm": {
+      "type": "http",
+      "url": "https://gitmcp.io/drizzle-team/drizzle-orm"
+    },
+    "vueuse": {
+      "type": "http",
+      "url": "https://gitmcp.io/vueuse/vueuse"
+    },
+    "playwright": {
+      "command": "pnpx",
+      "args": ["@playwright/mcp@latest", "--browser", "firefox"]
+    }
+  }
+}

@@ -1,8 +1,9 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
-import { desc, eq } from 'drizzle-orm'
-import * as z from 'zod'
-import { TUsers } from '../db/schema'
-import { baseProcedure, createTRPCRouter } from '../utils/trpc'
+import { eq, sql } from 'drizzle-orm'
+import { TCounter } from '../db/schema'
+import { baseProcedure, createTRPCRouter } from '../lib/trpc'
+
+const COUNTER_ID = 'global'
 
 export const appRouter = createTRPCRouter({
   ping: baseProcedure
@@ -14,73 +15,33 @@ export const appRouter = createTRPCRouter({
       timestamp: new Date().toISOString(),
     })),
 
-  users: createTRPCRouter({
-    create: baseProcedure
-      .input(z.object({ name: z.string() }))
-      .mutation(async ({ input, ctx }) => {
-        const [user] = await ctx.db
-          .insert(TUsers)
-          .values({ name: input.name })
-          .returning()
-        return user
-      }),
-
-    delete: baseProcedure
-      .input(z.object({ id: z.string() }))
-      .mutation(async ({ input, ctx }) => {
-        await ctx.db.delete(TUsers).where(eq(TUsers.id, input.id))
-        return { success: true }
-      }),
-
-    update: baseProcedure
-      .input(
-        z.object({
-          id: z.string(),
-          name: z.string(),
-        }),
-      )
-      .mutation(async ({ input, ctx }) => {
-        const [user] = await ctx.db
-          .update(TUsers)
-          .set({ name: input.name })
-          .where(eq(TUsers.id, input.id))
-          .returning()
-        return user
-      }),
-
-    list: baseProcedure
+  counter: createTRPCRouter({
+    get: baseProcedure
       .query(async ({ ctx }) => {
-        return await ctx.db
+        const row = await ctx.db
           .select()
-          .from(TUsers)
-          .orderBy(desc(TUsers.createdAt))
-      }),
-  }),
-
-  files: createTRPCRouter({
-    list: baseProcedure
-      .query(async ({ ctx }) => {
-        return await ctx.files.list()
+          .from(TCounter)
+          .where(eq(TCounter.id, COUNTER_ID))
+          .get()
+        return { count: row?.count ?? 0 }
       }),
 
-    put: baseProcedure
-      .input(
-        z.instanceof(FormData)
-          .transform(e => Object.fromEntries(e.entries()))
-          .pipe(
-            z.object({
-              key: z.string(),
-              file: z.instanceof(File).refine(f => f.size > 0),
-            })),
-      )
-      .mutation(async ({ input, ctx }) => {
-        const buffer = await input.file.arrayBuffer()
-        await ctx.files.put(input.key, new Uint8Array(buffer))
+    increment: baseProcedure
+      .mutation(async ({ ctx }) => {
+        const row = await ctx.db
+          .insert(TCounter)
+          .values({ id: COUNTER_ID, count: 1 })
+          .onConflictDoUpdate({
+            target: TCounter.id,
+            set: { count: sql`${TCounter.count} + 1` },
+          })
+          .returning()
+          .get()
+        return { count: row?.count ?? 0 }
       }),
   }),
 })
 
-// export type definition of API
 export type AppRouter = typeof appRouter
 export type AppRouterInputs = inferRouterInputs<AppRouter>
 export type AppRouterOutputs = inferRouterOutputs<AppRouter>
