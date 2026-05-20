@@ -1,6 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@vueuse/nuxt', '@nuxt/ui', 'nitro-cloudflare-dev'],
+  modules: [
+    '@nuxt/eslint',
+    '@vueuse/nuxt',
+    '@nuxt/ui',
+    'nitro-cloudflare-dev',
+  ],
 
   devtools: {
     enabled: false,
