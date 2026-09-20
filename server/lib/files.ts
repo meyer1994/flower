@@ -6,6 +6,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { AwsClient } from 'aws4fetch'
 import type { H3Event } from 'h3'
 
 type Input = string | Uint8Array | Buffer | Blob | File
@@ -80,17 +81,14 @@ export const useR2FileStorage = (event: H3Event): Storage => {
   if (!bucket) throw new Error('Missing FILES binding')
 
   const bucketName = config.files.bucket
+  const endpoint = config.files.endpoint.replace(/\/$/, '')
 
-  // R2 uses S3-compatible API with the same AWS credentials
-  // R2 requires 'auto' region and path-style addressing
-  const s3 = new S3Client({
-    region: 'auto', // R2 uses 'auto' as the region
-    credentials: {
-      accessKeyId: config.files.accessKeyId,
-      secretAccessKey: config.files.secretAccessKey,
-    },
-    endpoint: config.files.endpoint,
-    forcePathStyle: true, // R2 requires path-style addressing
+  // Bindings don't support pre-signed URLs; sign via S3-compatible R2 endpoint
+  const aws = new AwsClient({
+    accessKeyId: config.files.accessKeyId,
+    secretAccessKey: config.files.secretAccessKey,
+    service: 's3',
+    region: config.files.region,
   })
 
   return {
@@ -117,9 +115,10 @@ export const useR2FileStorage = (event: H3Event): Storage => {
     },
 
     url: async (key: string, expiresIn: number = 3600) => {
-      // Bindings don't support pre-signed URLs, so we fall back to S3
-      const command = new GetObjectCommand({ Bucket: bucketName, Key: key })
-      return await getSignedUrl(s3, command, { expiresIn })
+      const url = new URL(`${endpoint}/${bucketName}/${key}`)
+      url.searchParams.set('X-Amz-Expires', expiresIn.toString())
+      const signed = await aws.sign(new Request(url), { aws: { signQuery: true } })
+      return signed.url
     },
   }
 }
