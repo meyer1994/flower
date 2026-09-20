@@ -11,14 +11,5 @@ export default defineNuxtPlugin(() => {
 
   const useSession = async () => await auth.useSession(useFetch)
 
-  return {
-    provide: {
-      auth: {
-        signOut: auth.signOut,
-        signIn: auth.signIn,
-        signUp: auth.signUp,
-        useSession,
-      },
-    },
-  }
+  return { provide: { auth: { client: auth, useSession } } }
 })

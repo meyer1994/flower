@@ -9,7 +9,7 @@ const schema = z.object({ email: z.email(), password: z.string() })
 
 async function onSignIn(e: FormSubmitEvent<z.output<typeof schema>>) {
   try {
-    const { error } = await $auth.signIn.email({
+    const { error } = await $auth.client.signIn.email({
       email: e.data.email,
       password: e.data.password,
     })
@@ -28,7 +28,7 @@ async function onSignIn(e: FormSubmitEvent<z.output<typeof schema>>) {
 
 async function onSignUp(e: FormSubmitEvent<z.output<typeof schema>>) {
   try {
-    const { error } = await $auth.signUp.email({
+    const { error } = await $auth.client.signUp.email({
       email: e.data.email,
       password: e.data.password,
       name: e.data.email,

@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T">
-import type { AsyncDataOptions } from 'nuxt/app';
+import type { AsyncDataOptions } from 'nuxt/app'
 
 type FetchKey = MaybeRefOrGetter<string | string[]>
 

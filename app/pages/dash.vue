@@ -1,22 +1,14 @@
 <script setup lang="ts">
 import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 
-const route = useRoute()
 const { $auth } = useNuxtApp()
-
-const { data: session } = await $auth.useSession()
-watch(session, () => console.log(session.value))
+const { data: session, error } = await $auth.useSession()
+if (error.value) throw createError(error.value)
 
 const navMenu = computed<NavigationMenuItem[]>(() => {
-  const items: NavigationMenuItem[] = []
-
-  items.push({
-    label: 'Counter',
-    icon: 'i-lucide-plus',
-    to: '/dash/counter',
-  })
-
-  return items
+  return [
+    { label: 'Counter', icon: 'i-lucide-plus', to: '/dash/counter' },
+  ]
 })
 </script>
 
@@ -64,7 +56,7 @@ const navMenu = computed<NavigationMenuItem[]>(() => {
               label: 'Sair',
               icon: 'i-lucide-log-out',
               onSelect: async () => {
-                await $auth.signOut()
+                await $auth.client.signOut()
                 await reloadNuxtApp({ path: '/' })
               },
             },

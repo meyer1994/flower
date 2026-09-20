@@ -1,12 +1,13 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import type { H3Event } from 'h3'
+import * as schema from '../db/schema'
 import type { Database } from './drizzle'
 import { serverDrizzle } from './drizzle'
 
 export const createAuth = <T extends Database>(db: T) => {
   return betterAuth({
-    database: drizzleAdapter(db, { provider: 'sqlite' }),
+    database: drizzleAdapter(db, { provider: 'sqlite', schema }),
 
     advanced: {
       disableOriginCheck: import.meta.dev,
