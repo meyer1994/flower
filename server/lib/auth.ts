@@ -1,23 +1,33 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import type { H3Event } from 'h3'
+import type { Database } from './drizzle'
 import { serverDrizzle } from './drizzle'
 
-const db = serverDrizzle()
+export const createAuth = <T extends Database>(db: T) => {
+  return betterAuth({
+    database: drizzleAdapter(db, { provider: 'sqlite' }),
 
-const auth = betterAuth({
-  database: drizzleAdapter(db, { provider: 'sqlite' }),
+    advanced: {
+      disableOriginCheck: import.meta.dev,
+    },
 
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
+    emailAndPassword: {
+      enabled: true,
+      requireEmailVerification: false,
+    },
 
-  trustedOrigins: [
-    'localhost:3000', // local dev
-    'localhost:8787', // local preview
-    '*.workers.dev', // production
-  ],
-})
+    plugins: [],
 
-export const serverAuth = (_event: H3Event) => auth
+    trustedOrigins: [
+      'http://localhost:3000', // local dev
+      'http://localhost:8787', // local preview
+      'https://*.meyer1994.workers.dev', // production
+    ],
+  })
+}
+
+export const serverAuth = (event: H3Event) => {
+  const db = serverDrizzle(event)
+  return createAuth(db)
+}
