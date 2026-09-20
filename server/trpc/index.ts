@@ -1,13 +1,10 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { eq, sql } from 'drizzle-orm'
+import z from 'zod'
 import { TCounter } from '../db/schema'
 import { baseProcedure, createTRPCRouter } from '../lib/trpc'
-import { filesRouter } from './files'
-
-const COUNTER_ID = 'global'
 
 export const appRouter = createTRPCRouter({
-  files: filesRouter,
   ping: baseProcedure
     .query(() => 'pong'),
 
@@ -23,23 +20,61 @@ export const appRouter = createTRPCRouter({
         const row = await ctx.db
           .select()
           .from(TCounter)
-          .where(eq(TCounter.id, COUNTER_ID))
+          .where(eq(TCounter.id, 'BANANA'))
           .get()
-        return { count: row?.count ?? 0 }
+        return row ?? { id: 'BANANA', count: 0 }
       }),
 
-    increment: baseProcedure
+    inc: baseProcedure
       .mutation(async ({ ctx }) => {
         const row = await ctx.db
           .insert(TCounter)
-          .values({ id: COUNTER_ID, count: 1 })
+          .values({ id: 'BANANA', count: 0 })
           .onConflictDoUpdate({
-            target: TCounter.id,
+            target: [TCounter.id],
             set: { count: sql`${TCounter.count} + 1` },
           })
           .returning()
           .get()
-        return { count: row?.count ?? 0 }
+        return row
+      }),
+
+    dec: baseProcedure
+      .mutation(async ({ ctx }) => {
+        const row = await ctx.db
+          .insert(TCounter)
+          .values({ id: 'BANANA', count: 0 })
+          .onConflictDoUpdate({
+            target: [TCounter.id],
+            set: { count: sql`${TCounter.count} - 1` },
+          })
+          .returning()
+          .get()
+        return row
+      }),
+  }),
+
+  files: createTRPCRouter({
+    create: baseProcedure
+      .input(z.object({ file: z.instanceof(File) }))
+      .mutation(async ({ ctx, input }) => {
+        const id = crypto.randomUUID()
+        await ctx.files.put(id, input.file, { mimeType: input.file.type })
+        const url = await ctx.files.url(id)
+        return { id, url }
+      }),
+
+    list: baseProcedure
+      .query(async ({ ctx }) => {
+        const files = await ctx.files.list()
+        return await Promise.all(files
+          .map(async file => ({ id: file, url: await ctx.files.url(file) })))
+      }),
+
+    delete: baseProcedure
+      .input(z.object({ id: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        await ctx.files.delete(input.id)
       }),
   }),
 })

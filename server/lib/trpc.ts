@@ -25,7 +25,7 @@ export const createTRPCContext = async (event: H3Event): Promise<TRPCContext> =>
   const auth = serverAuth(event)
   const files = serverFiles(event)
 
-  const session = await auth.api.getSession()
+  const session = await auth.api.getSession({ headers: event.headers })
 
   console.info('[server.trpc] user id', session?.user?.id)
   return { event, db, auth, files, session }
