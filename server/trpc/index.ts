@@ -2,10 +2,12 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { eq, sql } from 'drizzle-orm'
 import { TCounter } from '../db/schema'
 import { baseProcedure, createTRPCRouter } from '../lib/trpc'
+import { filesRouter } from './files'
 
 const COUNTER_ID = 'global'
 
 export const appRouter = createTRPCRouter({
+  files: filesRouter,
   ping: baseProcedure
     .query(() => 'pong'),
 

@@ -3,6 +3,7 @@ import type { BetterAuthClientOptions, InferSessionFromClient, InferUserFromClie
 import type { H3Event } from 'h3'
 import { serverAuth } from './auth'
 import { serverDrizzle } from './drizzle'
+import { serverFiles } from './files'
 
 type Session = {
   user: InferUserFromClient<BetterAuthClientOptions>
@@ -11,24 +12,23 @@ type Session = {
 
 export type TRPCContext = {
   event: H3Event
+
   db: ReturnType<typeof serverDrizzle>
   auth: ReturnType<typeof serverAuth>
+  files: ReturnType<typeof serverFiles>
+
   session: Session | null
 }
 
-export const createTRPCContext = async (event: H3Event) => {
-  const auth = serverAuth(event)
+export const createTRPCContext = async (event: H3Event): Promise<TRPCContext> => {
   const db = serverDrizzle(event)
-  const session = await auth.api.getSession({ headers: event.headers })
+  const auth = serverAuth(event)
+  const files = serverFiles(event)
+
+  const session = await auth.api.getSession()
 
   console.info('[server.trpc] user id', session?.user?.id)
-
-  return {
-    event,
-    db,
-    auth,
-    session,
-  } satisfies TRPCContext
+  return { event, db, auth, files, session }
 }
 
 const t = initTRPC.context<TRPCContext>().create()
@@ -49,7 +49,8 @@ const logger = t.middleware(async ({ next, ctx }) => {
 
 const isAuthenticated = t.middleware(async ({ next, ctx }) => {
   if (!ctx.session?.user) throw new TRPCError({ code: 'FORBIDDEN' })
-  return next({ ctx })
+  type Context = TRPCContext & { session: Session }
+  return next({ ctx: ctx as Context })
 })
 
 export const createTRPCRouter = t.router

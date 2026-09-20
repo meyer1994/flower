@@ -4,7 +4,6 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@vueuse/nuxt',
     '@nuxt/ui',
-    'nitro-cloudflare-dev',
   ],
 
   devtools: {
@@ -13,6 +12,18 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  runtimeConfig: {
+    files: {
+      aws: {
+        bucket: '',
+        endpoint: '',
+        accessKeyId: '',
+        secretAccessKey: '',
+        region: 'auto',
+      },
+    },
+  },
 
   build: { transpile: ['trpc-nuxt'] },
 
@@ -24,6 +35,17 @@ export default defineNuxtConfig({
     cloudflare: {
       deployConfig: true,
       nodeCompat: true,
+    },
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@trpc/client',
+        '@trpc/client/links/loggerLink',
+        'better-auth/vue',
+        'zod',
+      ],
     },
   },
 

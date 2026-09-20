@@ -1,0 +1,114 @@
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import type { H3Event } from 'h3'
+
+type Input = string | Uint8Array | Buffer
+type InputOptions = { mimeType?: string }
+
+interface Storage {
+  get: (key: string) => Promise<Uint8Array>
+  put: (key: string, data: Input, opts: InputOptions) => Promise<void>
+  delete: (key: string) => Promise<void>
+  url: (key: string, expiresIn?: number) => Promise<string>
+}
+
+export const useS3FileStorage = (event: H3Event): Storage => {
+  const config = useRuntimeConfig(event)
+
+  const s3 = new S3Client({
+    region: config.aws.region,
+    credentials: {
+      accessKeyId: config.aws.accessKeyId,
+      secretAccessKey: config.aws.secretAccessKey,
+    },
+    endpoint: config.aws.endpoint,
+    forcePathStyle: !!config.aws.endpoint,
+  })
+
+  const bucketName = config.aws.bucket
+
+  return {
+    get: async (key: string) => {
+      const command = new GetObjectCommand({ Bucket: bucketName, Key: key })
+      const response = await s3.send(command)
+      const arrayBuffer = await response.Body!.transformToByteArray()
+      return new Uint8Array(arrayBuffer)
+    },
+
+    put: async (key: string, data: Input, opts: InputOptions = {}) => {
+      const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+        Body: data,
+        ContentType: opts.mimeType,
+      })
+      await s3.send(command)
+    },
+
+    delete: async (key: string) => {
+      const command = new DeleteObjectCommand({ Bucket: bucketName, Key: key })
+      await s3.send(command)
+    },
+
+    url: async (key: string, expiresIn: number = 3600) => {
+      const command = new GetObjectCommand({ Bucket: bucketName, Key: key })
+      return await getSignedUrl(s3, command, { expiresIn })
+    },
+  }
+}
+
+export const useR2FileStorage = (event: H3Event): Storage => {
+  const config = useRuntimeConfig(event)
+  const bucket = event.context.cloudflare?.env?.ATTACHMENTS as R2Bucket
+  if (!bucket) throw new Error('Missing ATTACHMENTS binding')
+
+  // R2 uses S3-compatible API with the same AWS credentials
+  // R2 requires 'auto' region and path-style addressing
+  const s3 = new S3Client({
+    region: 'auto', // R2 uses 'auto' as the region
+    credentials: {
+      accessKeyId: config.aws.accessKeyId,
+      secretAccessKey: config.aws.secretAccessKey,
+    },
+    endpoint: config.aws.endpoint,
+    forcePathStyle: true, // R2 requires path-style addressing
+  })
+
+  const bucketName = config.aws.bucket
+
+  return {
+    get: async (key: string) => {
+      const object = await bucket.get(key)
+      if (!object) throw new Error(`Object ${key} not found`)
+      const arrayBuffer = await object.arrayBuffer()
+      return new Uint8Array(arrayBuffer)
+    },
+
+    put: async (key: string, data: Input, opts: InputOptions = {}) => {
+      await bucket.put(key, data, {
+        httpMetadata: { contentType: opts.mimeType },
+      })
+    },
+
+    delete: async (key: string) => {
+      await bucket.delete(key)
+    },
+
+    url: async (key: string, expiresIn: number = 3600) => {
+      // Bindings don't support pre-signed URLs, so we fall back to S3
+      const command = new GetObjectCommand({ Bucket: bucketName, Key: key })
+      return await getSignedUrl(s3, command, { expiresIn })
+    },
+  }
+}
+
+export const serverFiles = (event: H3Event): Storage => {
+  // Use R2 in production, S3 otherwise
+  if (process.env.NODE_ENV === 'production') return useR2FileStorage(event)
+  return useS3FileStorage(event)
+}
