@@ -1,3 +1,8 @@
+CREATE TABLE `counter` (
+	`id` text PRIMARY KEY NOT NULL,
+	`count` integer DEFAULT 0 NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `account` (
 	`id` text PRIMARY KEY NOT NULL,
 	`account_id` text NOT NULL,
