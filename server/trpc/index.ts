@@ -56,12 +56,20 @@ export const appRouter = createTRPCRouter({
 
   files: createTRPCRouter({
     create: baseProcedure
-      .input(z.object({ file: z.instanceof(File) }))
+      .input(
+        z.instanceof(FormData)
+          .transform(i => Object.fromEntries(i.entries()))
+          .pipe(z.object({
+            file: z.instanceof(File)
+              .refine(i => i.size > 0)
+              .refine(i => i.size < 10 * 1024 * 1024, 'File size must be less than 10MB'),
+          })),
+      )
       .mutation(async ({ ctx, input }) => {
         const id = crypto.randomUUID()
         await ctx.files.put(id, input.file, { mimeType: input.file.type })
         const url = await ctx.files.url(id)
-        return { id, url }
+        return { id, url, name: input.file.name }
       }),
 
     list: baseProcedure

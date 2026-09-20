@@ -11,5 +11,5 @@ services:
       [
         "/bin/sh",
         "-c",
-        "mkdir -p /data/uploads && minio server /data --console-address ':9001'",
+        "mkdir -p /data/flower && minio server /data --console-address ':9001'",
       ]

@@ -2,9 +2,9 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   ListObjectsV2Command,
-  PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3'
+import { Upload } from '@aws-sdk/lib-storage'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type { H3Event } from 'h3'
 
@@ -23,16 +23,16 @@ export const useS3FileStorage = (event: H3Event): Storage => {
   const config = useRuntimeConfig(event)
 
   const s3 = new S3Client({
-    region: config.aws.region,
+    region: config.files.region,
     credentials: {
-      accessKeyId: config.aws.accessKeyId,
-      secretAccessKey: config.aws.secretAccessKey,
+      accessKeyId: config.files.accessKeyId,
+      secretAccessKey: config.files.secretAccessKey,
     },
-    endpoint: config.aws.endpoint,
-    forcePathStyle: !!config.aws.endpoint,
+    endpoint: config.files.endpoint,
+    forcePathStyle: !!config.files.endpoint,
   })
 
-  const bucketName = config.aws.bucket
+  const bucketName = config.files.bucket
 
   return {
     get: async (key: string) => {
@@ -43,13 +43,16 @@ export const useS3FileStorage = (event: H3Event): Storage => {
     },
 
     put: async (key: string, data: Input, opts: InputOptions = {}) => {
-      const command = new PutObjectCommand({
-        Bucket: bucketName,
-        Key: key,
-        Body: data,
-        ContentType: opts.mimeType,
+      const upload = new Upload({
+        client: s3,
+        params: {
+          Bucket: bucketName,
+          Key: key,
+          Body: data,
+          ContentType: opts.mimeType,
+        },
       })
-      await s3.send(command)
+      await upload.done()
     },
 
     list: async (prefix?: string) => {
@@ -74,21 +77,21 @@ export const useS3FileStorage = (event: H3Event): Storage => {
 export const useR2FileStorage = (event: H3Event): Storage => {
   const config = useRuntimeConfig(event)
   const bucket = event.context.cloudflare?.env?.FILES as R2Bucket
-  if (!bucket) throw new Error('Missing ATTACHMENTS binding')
+  if (!bucket) throw new Error('Missing FILES binding')
+
+  const bucketName = config.files.bucket
 
   // R2 uses S3-compatible API with the same AWS credentials
   // R2 requires 'auto' region and path-style addressing
   const s3 = new S3Client({
     region: 'auto', // R2 uses 'auto' as the region
     credentials: {
-      accessKeyId: config.aws.accessKeyId,
-      secretAccessKey: config.aws.secretAccessKey,
+      accessKeyId: config.files.accessKeyId,
+      secretAccessKey: config.files.secretAccessKey,
     },
-    endpoint: config.aws.endpoint,
+    endpoint: config.files.endpoint,
     forcePathStyle: true, // R2 requires path-style addressing
   })
-
-  const bucketName = config.aws.bucket
 
   return {
     get: async (key: string) => {
@@ -122,7 +125,6 @@ export const useR2FileStorage = (event: H3Event): Storage => {
 }
 
 export const serverFiles = (event: H3Event): Storage => {
-  // Use R2 in production, S3 otherwise
-  if (process.env.NODE_ENV === 'production') return useR2FileStorage(event)
-  return useS3FileStorage(event)
+  if (import.meta.dev) return useS3FileStorage(event)
+  return useR2FileStorage(event)
 }

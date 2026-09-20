@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
-    aws: {
+    files: {
       bucket: '',
       endpoint: '',
       accessKeyId: '',
