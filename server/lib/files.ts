@@ -1,18 +1,20 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type { H3Event } from 'h3'
 
-type Input = string | Uint8Array | Buffer
+type Input = string | Uint8Array | Buffer | Blob | File
 type InputOptions = { mimeType?: string }
 
 interface Storage {
   get: (key: string) => Promise<Uint8Array>
   put: (key: string, data: Input, opts: InputOptions) => Promise<void>
+  list: (prefix?: string) => Promise<string[]>
   delete: (key: string) => Promise<void>
   url: (key: string, expiresIn?: number) => Promise<string>
 }
@@ -50,6 +52,13 @@ export const useS3FileStorage = (event: H3Event): Storage => {
       await s3.send(command)
     },
 
+    list: async (prefix?: string) => {
+      const command = new ListObjectsV2Command({ Bucket: bucketName, Prefix: prefix })
+      const response = await s3.send(command)
+      const items = response.Contents?.map(item => item.Key).filter(Boolean) ?? []
+      return items as string[]
+    },
+
     delete: async (key: string) => {
       const command = new DeleteObjectCommand({ Bucket: bucketName, Key: key })
       await s3.send(command)
@@ -64,7 +73,7 @@ export const useS3FileStorage = (event: H3Event): Storage => {
 
 export const useR2FileStorage = (event: H3Event): Storage => {
   const config = useRuntimeConfig(event)
-  const bucket = event.context.cloudflare?.env?.ATTACHMENTS as R2Bucket
+  const bucket = event.context.cloudflare?.env?.FILES as R2Bucket
   if (!bucket) throw new Error('Missing ATTACHMENTS binding')
 
   // R2 uses S3-compatible API with the same AWS credentials
@@ -93,6 +102,11 @@ export const useR2FileStorage = (event: H3Event): Storage => {
       await bucket.put(key, data, {
         httpMetadata: { contentType: opts.mimeType },
       })
+    },
+
+    list: async (prefix?: string) => {
+      const objects = await bucket.list({ prefix })
+      return objects.objects.map(object => object.key)
     },
 
     delete: async (key: string) => {

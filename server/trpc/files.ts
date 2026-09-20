@@ -6,7 +6,7 @@ export const filesRouter = createTRPCRouter({
   list: protectedProcedure
     .query(async ({ ctx }) => {
       const storage = serverFiles(ctx.event)
-      const keys = await storage.getKeys()
+      const keys = await storage.list()
       return keys
     }),
 
@@ -22,7 +22,7 @@ export const filesRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const storage = serverFiles(ctx.event)
-      await storage.setItemRaw(input.file.name, input.file, { contentType: input.file.type })
+      await storage.put(input.file.name, input.file, { mimeType: input.file.type })
       return { success: true }
     }),
 })

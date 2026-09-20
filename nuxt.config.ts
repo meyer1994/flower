@@ -14,14 +14,12 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
-    files: {
-      aws: {
-        bucket: '',
-        endpoint: '',
-        accessKeyId: '',
-        secretAccessKey: '',
-        region: 'auto',
-      },
+    aws: {
+      bucket: '',
+      endpoint: '',
+      accessKeyId: '',
+      secretAccessKey: '',
+      region: 'auto',
     },
   },
 
