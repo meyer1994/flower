@@ -1,13 +1,7 @@
 <script setup lang="ts" generic="T">
-import type { AsyncDataOptions } from '#app'
+import type { AsyncDataOptions } from 'nuxt/app';
 
-type FetchKey
-  = | string
-    | string[]
-    | MaybeRef<string>
-    | MaybeRef<string[]>
-    | (() => string)
-    | (() => string[])
+type FetchKey = MaybeRefOrGetter<string | string[]>
 
 const props = defineProps<{
   fetchKey: FetchKey
@@ -22,9 +16,7 @@ const key = computed<string>(() => {
   return Array.isArray(key) ? key.join(':') : key
 })
 
-const {
-  data, status, error, refresh, clear,
-} = useAsyncData<T>(key, async () => {
+const { data, status, error, refresh, clear } = useAsyncData<T>(key, async () => {
   return await props.handler()
 })
 
@@ -36,9 +28,7 @@ type Slots = {
   clear: typeof clear
 }
 
-defineSlots<{
-  default(props: Slots): Slots
-}>()
+defineSlots<{ default(props: Slots): Slots }>()
 </script>
 
 <template>
