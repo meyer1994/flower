@@ -65,7 +65,7 @@ const ctaLinks = computed<ButtonProps[]>(() => {
 <template>
   <div>
     <UPageHero
-      headline="bruch"
+      headline="flower"
       title="Build faster with a solid foundation"
       description="A Nuxt starter with auth, a dashboard shell, and file storage — ready for your next product."
       :links="links"

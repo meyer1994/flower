@@ -31,7 +31,7 @@ const navMenu = computed<NavigationMenuItem[]>(() => {
           />
 
           <template v-if="!collapsed">
-            bruch
+            flower
           </template>
         </NuxtLink>
       </template>

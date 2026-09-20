@@ -60,15 +60,15 @@ async function onSignUp(e: FormSubmitEvent<z.output<typeof schema>>) {
             name="i-lucide-flower"
             class="text-3xl text-primary"
           />
-          <span class="text-2xl font-bold text-white">trackows</span>
+          <span class="text-2xl font-bold text-white">flower</span>
         </div>
         <h1 class="text-5xl font-bold text-white mb-4">
-          Acompanhe seus
+          Build faster with
           <br>
-          <span class="text-primary">Dispositivos</span>
+          <span class="text-primary">a solid foundation</span>
         </h1>
         <p class="text-gray-400 text-lg">
-          Rastreamento GPS e telemetria em tempo real para seus dispositivos conectados.
+          A Nuxt starter with auth, a dashboard shell, and file storage — ready for your next product.
         </p>
       </div>
 
@@ -144,7 +144,7 @@ async function onSignUp(e: FormSubmitEvent<z.output<typeof schema>>) {
             <UAuthForm
               :schema="schema"
               title="Create account"
-              description="Create an account to start tracking your devices."
+              description="Create an account to get started."
               icon="i-lucide-user-plus"
               :fields="([
                 {
