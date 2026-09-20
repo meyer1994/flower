@@ -1,6 +1,7 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   ListObjectsV2Command,
   S3Client,
 } from '@aws-sdk/client-s3'
@@ -11,11 +12,12 @@ import type { H3Event } from 'h3'
 
 type Input = string | Uint8Array | Buffer | Blob | File
 type InputOptions = { mimeType?: string }
+type ListedFile = { key: string, mimeType: string | null }
 
 interface Storage {
   get: (key: string) => Promise<Uint8Array>
   put: (key: string, data: Input, opts: InputOptions) => Promise<void>
-  list: (prefix?: string) => Promise<string[]>
+  list: (prefix?: string) => Promise<ListedFile[]>
   delete: (key: string) => Promise<void>
   url: (key: string, expiresIn?: number) => Promise<string>
 }
@@ -59,8 +61,11 @@ export const useS3FileStorage = (event: H3Event): Storage => {
     list: async (prefix?: string) => {
       const command = new ListObjectsV2Command({ Bucket: bucketName, Prefix: prefix })
       const response = await s3.send(command)
-      const items = response.Contents?.map(item => item.Key).filter(Boolean) ?? []
-      return items as string[]
+      const keys = (response.Contents?.map(item => item.Key).filter(Boolean) ?? []) as string[]
+      return await Promise.all(keys.map(async (key) => {
+        const head = await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: key }))
+        return { key, mimeType: head.ContentType ?? null }
+      }))
     },
 
     delete: async (key: string) => {
@@ -106,8 +111,11 @@ export const useR2FileStorage = (event: H3Event): Storage => {
     },
 
     list: async (prefix?: string) => {
-      const objects = await bucket.list({ prefix })
-      return objects.objects.map(object => object.key)
+      const objects = await bucket.list({ prefix, include: ['httpMetadata'] })
+      return objects.objects.map(object => ({
+        key: object.key,
+        mimeType: object.httpMetadata?.contentType ?? null,
+      }))
     },
 
     delete: async (key: string) => {

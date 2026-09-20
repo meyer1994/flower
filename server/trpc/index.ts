@@ -2,7 +2,7 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { eq, sql } from 'drizzle-orm'
 import z from 'zod'
 import { TCounter } from '../db/schema'
-import { baseProcedure, createTRPCRouter } from '../lib/trpc'
+import { baseProcedure, createTRPCRouter, protectedProcedure } from '../lib/trpc'
 
 export const appRouter = createTRPCRouter({
   ping: baseProcedure
@@ -15,7 +15,7 @@ export const appRouter = createTRPCRouter({
     })),
 
   counter: createTRPCRouter({
-    get: baseProcedure
+    get: protectedProcedure
       .query(async ({ ctx }) => {
         const row = await ctx.db
           .select()
@@ -25,7 +25,7 @@ export const appRouter = createTRPCRouter({
         return row ?? { id: 'BANANA', count: 0 }
       }),
 
-    inc: baseProcedure
+    inc: protectedProcedure
       .mutation(async ({ ctx }) => {
         const row = await ctx.db
           .insert(TCounter)
@@ -39,7 +39,7 @@ export const appRouter = createTRPCRouter({
         return row
       }),
 
-    dec: baseProcedure
+    dec: protectedProcedure
       .mutation(async ({ ctx }) => {
         const row = await ctx.db
           .insert(TCounter)
@@ -55,7 +55,7 @@ export const appRouter = createTRPCRouter({
   }),
 
   files: createTRPCRouter({
-    create: baseProcedure
+    create: protectedProcedure
       .input(
         z.instanceof(FormData)
           .transform(i => Object.fromEntries(i.entries()))
@@ -72,14 +72,17 @@ export const appRouter = createTRPCRouter({
         return { id, url, name: input.file.name }
       }),
 
-    list: baseProcedure
+    list: protectedProcedure
       .query(async ({ ctx }) => {
         const files = await ctx.files.list()
-        return await Promise.all(files
-          .map(async file => ({ id: file, url: await ctx.files.url(file) })))
+        return await Promise.all(files.map(async file => ({
+          id: file.key,
+          url: await ctx.files.url(file.key),
+          mimeType: file.mimeType,
+        })))
       }),
 
-    delete: baseProcedure
+    delete: protectedProcedure
       .input(z.object({ id: z.string().min(1) }))
       .mutation(async ({ ctx, input }) => {
         await ctx.files.delete(input.id)

@@ -20,6 +20,11 @@ const onSubmit = async (e: FormSubmitEvent<Schema>) => {
   state.files = []
 }
 
+const onDelete = async (id: string) => {
+  await $trpc.files.delete.mutate({ id })
+  await refresh()
+}
+
 type Item = NonNullable<typeof files['value']>[number]
 const columns: TableColumn<Item>[] = [
   {
@@ -27,8 +32,16 @@ const columns: TableColumn<Item>[] = [
     header: 'ID',
   },
   {
+    accessorKey: 'mimeType',
+    header: 'MIME Type',
+  },
+  {
     accessorKey: 'url',
     header: 'URL',
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
   },
 ]
 </script>
@@ -75,6 +88,16 @@ const columns: TableColumn<Item>[] = [
           >
             <UIcon name="i-lucide-external-link" />
           </ULink>
+        </template>
+
+        <template #actions-cell="{ row }">
+          <UButton
+            icon="i-lucide-trash"
+            color="error"
+            variant="ghost"
+            size="sm"
+            @click="onDelete(row.original.id)"
+          />
         </template>
       </UTable>
     </UCard>
