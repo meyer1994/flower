@@ -1,3 +1,12 @@
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  better-sqlite3: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+  vue-demi: true
+  workerd: true
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@tailwindcss/oxide'
