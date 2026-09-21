@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { ImageUpload } from '~/components/editor/extensions'
+import { GlobalAttrs, ImageUpload } from '~/components/editor/extensions'
 import { Handlers } from '~/components/editor/handler'
 
 type Props = { id: string }
@@ -88,6 +88,7 @@ const commands: EditorSuggestionMenuItem[][] = [
 // extensions
 const extensions = [
   ImageUpload,
+  GlobalAttrs({ jid: props.id }),
 
   // custom keymap
   Extension.create({

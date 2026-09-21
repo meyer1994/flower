@@ -1,5 +1,5 @@
 import type { CommandProps, NodeViewRenderer } from '@tiptap/core'
-import { Node, mergeAttributes } from '@tiptap/core'
+import { Extension, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import JImageUpload from './JImageUpload.vue'
 
@@ -34,5 +34,16 @@ export const ImageUpload = Node.create({
         return commands.insertContent({ type: this.name })
       },
     }
+  },
+})
+
+type Attrs = {
+  jid: string
+}
+
+export const GlobalAttrs = (attrs: Attrs) => Extension.create({
+  name: 'globalAttrs',
+  addGlobalAttributes() {
+    return [{ types: 'nodes', attributes: { jid: { default: attrs.jid } } }]
   },
 })
