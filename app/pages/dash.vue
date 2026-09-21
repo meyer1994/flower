@@ -7,8 +7,8 @@ if (error.value) throw createError(error.value)
 
 const navMenu = computed<NavigationMenuItem[]>(() => {
   return [
-    { label: 'Counter', icon: 'i-lucide-plus', to: '/dash/counter' },
     { label: 'Files', icon: 'i-lucide-files', to: '/dash/files' },
+    { label: 'Editor', icon: 'i-lucide-type', to: '/dash/editor' },
   ]
 })
 </script>

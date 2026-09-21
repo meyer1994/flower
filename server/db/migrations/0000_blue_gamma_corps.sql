@@ -1,8 +1,12 @@
-CREATE TABLE `counter` (
-	`id` text PRIMARY KEY NOT NULL,
-	`count` integer DEFAULT 0 NOT NULL
+CREATE TABLE `content` (
+	`id` text NOT NULL,
+	`body` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	PRIMARY KEY(`id`, `created_at`)
 );
 --> statement-breakpoint
+CREATE INDEX `idx_content_id_created_at` ON `content` ("id" desc,"created_at" desc);--> statement-breakpoint
 CREATE TABLE `account` (
 	`id` text PRIMARY KEY NOT NULL,
 	`account_id` text NOT NULL,

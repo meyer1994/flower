@@ -18,6 +18,13 @@ export const createAuth = <T extends Database>(db: T) => {
       requireEmailVerification: false,
     },
 
+    logger: {
+      log: (message) => {
+        if (!import.meta.dev) return
+        console.info('[server.auth] log', message)
+      },
+    },
+
     plugins: [],
 
     trustedOrigins: [

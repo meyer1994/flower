@@ -1,31 +1,61 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ffea4459-de00-412b-aee9-bdb6bec5f9f6",
+  "id": "885fbbb9-142b-4448-b22d-7a0d7cb65dbe",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "counter": {
-      "name": "counter",
+    "content": {
+      "name": "content",
       "columns": {
         "id": {
           "name": "id",
           "type": "text",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "count": {
-          "name": "count",
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": 0
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_content_id_created_at": {
+          "name": "idx_content_id_created_at",
+          "columns": [
+            "\"id\" desc",
+            "\"created_at\" desc"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "content_id_created_at_pk": {
+          "columns": [
+            "id",
+            "created_at"
+          ],
+          "name": "content_id_created_at_pk"
+        }
+      },
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -390,6 +420,17 @@
     "columns": {}
   },
   "internal": {
-    "indexes": {}
+    "indexes": {
+      "idx_content_id_created_at": {
+        "columns": {
+          "\"id\" desc": {
+            "isExpression": true
+          },
+          "\"created_at\" desc": {
+            "isExpression": true
+          }
+        }
+      }
+    }
   }
 }

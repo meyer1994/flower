@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
-import type { Extension } from '@tiptap/core'
+import { Extension, type KeyboardShortcutCommand } from '@tiptap/core'
 
-const value = ref(`# Hello, Editor
+const route = useRoute()
+const { $trpc } = useNuxtApp()
 
-This is the Nuxt UI **Editor** component, powered by *TipTap*.
+const { data, error } = await useAsyncData('content',
+  async () => {
+    if (!route.query.id) return await $trpc.editor.create.mutate()
+    return await $trpc.editor.get.query({ id: route.query.id as string })
+  })
+if (error.value) console.error(error.value)
 
-Select some text to reveal the bubble toolbar, or use the fixed toolbar above.
-
-### Features
-
-- **Bold** · *Italic* · <u>Underline</u> · ~~Strikethrough~~ · \`code\`
-- Headings, lists, blockquotes and code blocks
-- Markdown, HTML and JSON content
-
-> Tip: use the fixed toolbar to add a code block or quote.`)
+const content = ref(data.value?.body ?? '')
 
 const items: EditorToolbarItem[][] = [
   [
@@ -74,15 +72,43 @@ const commands: EditorSuggestionMenuItem[][] = [
   ],
 ]
 
+const toast = useToast()
+const keymap = Extension.create({
+  name: 'editorKeymap',
+  addKeyboardShortcuts(): Record<string, KeyboardShortcutCommand> {
+    return {
+      'Mod-Shift-Enter': () => {
+        if (!data.value) return true
+        void $trpc.editor.update.mutate({ id: data.value.id, body: content.value })
+          .catch(() => toast.add({
+            title: 'Error saving content',
+            description: 'Mod+Shift+Enter',
+            color: 'error',
+          }))
+          .then(() => toast.add({
+            title: 'Content saved',
+            description: 'Mod+Shift+Enter',
+            color: 'primary',
+          }))
+          .then(() => {
+            if (!data.value?.id) return
+            void navigateTo({ query: { id: data.value?.id }, replace: true })
+          })
+        return true
+      },
+    }
+  },
+})
+
 const extensions: Extension[] = [
-  useEditorKeymap(),
+  keymap,
 ]
 </script>
 
 <template>
   <UContainer class="py-6 space-y-6">
     <UPageHeader
-      title="Editor"
+      :title="`Editor${data ? ` - ${data.id}` : ''}`"
       description="A rich text editor example built with Nuxt UI & TipTap (Markdown)."
     />
 
@@ -94,7 +120,7 @@ const extensions: Extension[] = [
       >
         <pre
           class="p-4 text-xs font-mono text-muted-foreground bg-muted/50 overflow-auto h-96 whitespace-pre-wrap break-words"
-        >{{ value }}</pre>
+        >{{ content }}</pre>
       </UCard>
 
       <UCard
@@ -103,7 +129,7 @@ const extensions: Extension[] = [
       >
         <UEditor
           v-slot="{ editor }"
-          v-model="value"
+          v-model="content"
           content-type="markdown"
           placeholder="/ for commands"
           :ui="{ base: 'px-6 py-4 min-h-64' }"

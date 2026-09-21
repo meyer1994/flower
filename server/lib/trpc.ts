@@ -39,12 +39,16 @@ const logger = t.middleware(async ({ next, ctx }) => {
   const path = ctx.event.path.split('?')[0]
   console.info(`[server.trpc] start ${path}`)
 
-  const result = await next({ ctx })
-
-  const end = Date.now()
-  console.info(`[server.trpc] end ${path} - ${end - start}ms`)
-
-  return result
+  try {
+    const result = await next({ ctx })
+    const end = Date.now()
+    console.info(`[server.trpc] end ${path} - ${end - start}ms`)
+    return result
+  }
+  catch (error) {
+    console.error('[server.trpc] error', error)
+    throw error
+  }
 })
 
 const isAuthenticated = t.middleware(async ({ next, ctx }) => {

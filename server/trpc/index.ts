@@ -1,7 +1,7 @@
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
-import { eq, sql } from 'drizzle-orm'
+import { TRPCError, type inferRouterInputs, type inferRouterOutputs } from '@trpc/server'
+import { desc, eq } from 'drizzle-orm'
 import z from 'zod'
-import { TCounter } from '../db/schema'
+import { TContent } from '../db/schema'
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../lib/trpc'
 
 export const appRouter = createTRPCRouter({
@@ -14,42 +14,41 @@ export const appRouter = createTRPCRouter({
       timestamp: new Date().toISOString(),
     })),
 
-  counter: createTRPCRouter({
-    get: protectedProcedure
-      .query(async ({ ctx }) => {
-        const row = await ctx.db
-          .select()
-          .from(TCounter)
-          .where(eq(TCounter.id, 'BANANA'))
-          .get()
-        return row ?? { id: 'BANANA', count: 0 }
-      }),
-
-    inc: protectedProcedure
+  editor: createTRPCRouter({
+    create: baseProcedure
       .mutation(async ({ ctx }) => {
         const row = await ctx.db
-          .insert(TCounter)
-          .values({ id: 'BANANA', count: 0 })
-          .onConflictDoUpdate({
-            target: [TCounter.id],
-            set: { count: sql`${TCounter.count} + 1` },
-          })
+          .insert(TContent)
+          .values({ body: '' })
           .returning()
           .get()
+        if (!row) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
         return row
       }),
 
-    dec: protectedProcedure
-      .mutation(async ({ ctx }) => {
+    update: baseProcedure
+      .input(z.object({ id: z.string().min(1), body: z.string() }))
+      .mutation(async ({ ctx, input }) => {
         const row = await ctx.db
-          .insert(TCounter)
-          .values({ id: 'BANANA', count: 0 })
-          .onConflictDoUpdate({
-            target: [TCounter.id],
-            set: { count: sql`${TCounter.count} - 1` },
-          })
+          .insert(TContent)
+          .values({ id: input.id, body: input.body })
           .returning()
           .get()
+        if (!row) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
+        return row
+      }),
+
+    get: baseProcedure
+      .input(z.object({ id: z.string().min(1) }))
+      .query(async ({ ctx, input }) => {
+        const row = await ctx.db
+          .select()
+          .from(TContent)
+          .where(eq(TContent.id, input.id))
+          .orderBy(desc(TContent.createdAt))
+          .limit(1)
+          .get()
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND' })
         return row
       }),
   }),

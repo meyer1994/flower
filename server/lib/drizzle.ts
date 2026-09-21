@@ -12,7 +12,7 @@ export const serverDrizzle = (event: H3Event): Database => {
   const logger: Logger = {
     logQuery: (query, params) => {
       if (!import.meta.dev) return
-      console.debug('[server.drizzle] query', { query, params })
+      console.info('[server.drizzle] query', { query, params })
     },
   }
 
