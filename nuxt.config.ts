@@ -23,8 +23,6 @@ export default defineNuxtConfig({
     },
   },
 
-  build: { transpile: ['trpc-nuxt'] },
-
   compatibilityDate: '2026-09-20',
 
   nitro: {
