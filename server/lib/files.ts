@@ -82,7 +82,7 @@ export const useS3FileStorage = (event: H3Event): Storage => {
 
 export const useR2FileStorage = (event: H3Event): Storage => {
   const config = useRuntimeConfig(event)
-  const bucket = event.context.cloudflare?.env?.FILES as R2Bucket
+  const bucket = event.context.cloudflare?.env.FILES as R2Bucket
   if (!bucket) throw new Error('Missing FILES binding')
 
   const bucketName = config.files.bucket

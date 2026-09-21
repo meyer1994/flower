@@ -3,8 +3,10 @@ import type { FormSubmitEvent, TableColumn } from '@nuxt/ui'
 import z from 'zod'
 
 const { $trpc } = useNuxtApp()
-const { data: files, refresh } = await useAsyncData('files',
+const { data: files, status, refresh, error } = useAsyncData('files',
   async () => await $trpc.files.list.query())
+
+if (error.value) console.error(error.value)
 
 const schema = z.object({ files: z.array(z.instanceof(File)) })
 type Schema = z.output<typeof schema>
@@ -79,6 +81,7 @@ const columns: TableColumn<Item>[] = [
       <UTable
         :data="files"
         :columns="columns"
+        :loading="status === 'pending'"
       >
         <template #url-cell="{ row }">
           <ULink
