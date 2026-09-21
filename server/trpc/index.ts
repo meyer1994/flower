@@ -3,7 +3,7 @@ import { TRPCError, type inferRouterInputs, type inferRouterOutputs } from '@trp
 import { desc, eq } from 'drizzle-orm'
 import z from 'zod'
 import { TContent } from '../db/schema'
-import { baseProcedure, createTRPCRouter, protectedProcedure } from '../lib/trpc'
+import { baseProcedure, createTRPCRouter } from '../lib/trpc'
 
 export const appRouter = createTRPCRouter({
   ping: baseProcedure
@@ -55,7 +55,7 @@ export const appRouter = createTRPCRouter({
   }),
 
   files: createTRPCRouter({
-    create: protectedProcedure
+    create: baseProcedure
       .input(
         z.instanceof(FormData)
           .transform(i => Object.fromEntries(i.entries()))
@@ -72,7 +72,7 @@ export const appRouter = createTRPCRouter({
         return { id, url, name: input.file.name }
       }),
 
-    list: protectedProcedure
+    list: baseProcedure
       .query(async ({ ctx }) => {
         const files = await ctx.files.list()
         return await Promise.all(files.map(async file => ({
@@ -82,7 +82,7 @@ export const appRouter = createTRPCRouter({
         })))
       }),
 
-    delete: protectedProcedure
+    delete: baseProcedure
       .input(z.object({ id: z.string().min(1) }))
       .mutation(async ({ ctx, input }) => {
         await ctx.files.delete(input.id)
