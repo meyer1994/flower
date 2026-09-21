@@ -72,6 +72,14 @@ export const appRouter = createTRPCRouter({
         return { id, url, name: input.file.name }
       }),
 
+    get: baseProcedure
+      .input(z.object({ id: z.string().min(1) }))
+      .query(async ({ ctx, input }) => {
+        const meta = await ctx.files.meta(input.id)
+        if (!meta) throw new TRPCError({ code: 'NOT_FOUND' })
+        return { ...meta, url: await ctx.files.url(input.id) }
+      }),
+
     list: baseProcedure
       .query(async ({ ctx }) => {
         const files = await ctx.files.list()

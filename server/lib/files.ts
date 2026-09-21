@@ -12,14 +12,15 @@ import type { H3Event } from 'h3'
 
 type Input = string | Uint8Array | Buffer | Blob | File
 type InputOptions = { mimeType?: string }
-type ListedFile = { key: string, mimeType: string | null }
+type Meta = { key: string, mimeType: string, size: number }
 
 interface Storage {
   get: (key: string) => Promise<Uint8Array>
   put: (key: string, data: Input, opts: InputOptions) => Promise<void>
-  list: (prefix?: string) => Promise<ListedFile[]>
+  list: (prefix?: string) => Promise<Meta[]>
   delete: (key: string) => Promise<void>
   url: (key: string, expiresIn?: number) => Promise<string>
+  meta: (key: string) => Promise<Meta>
 }
 
 export const useS3FileStorage = (event: H3Event): Storage => {
@@ -64,8 +65,13 @@ export const useS3FileStorage = (event: H3Event): Storage => {
       const keys = (response.Contents?.map(item => item.Key).filter(Boolean) ?? []) as string[]
       return await Promise.all(keys.map(async (key) => {
         const head = await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: key }))
-        return { key, mimeType: head.ContentType ?? null }
+        return { key, mimeType: head.ContentType ?? '', size: head.ContentLength ?? 0 }
       }))
+    },
+
+    meta: async (key: string) => {
+      const head = await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: key }))
+      return { key, mimeType: head.ContentType ?? '', size: head.ContentLength ?? 0 }
     },
 
     delete: async (key: string) => {
@@ -114,8 +120,15 @@ export const useR2FileStorage = (event: H3Event): Storage => {
       const objects = await bucket.list({ prefix, include: ['httpMetadata'] })
       return objects.objects.map(object => ({
         key: object.key,
-        mimeType: object.httpMetadata?.contentType ?? null,
+        mimeType: object.httpMetadata?.contentType ?? '',
+        size: object.size,
       }))
+    },
+
+    meta: async (key: string) => {
+      const object = await bucket.get(key)
+      if (!object) throw new Error(`Object ${key} not found`)
+      return { key, mimeType: object.httpMetadata?.contentType ?? '', size: object.size }
     },
 
     delete: async (key: string) => {
