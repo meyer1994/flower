@@ -14,7 +14,7 @@ const onSubmit = async (file?: File) => {
   props.editor
     .chain()
     .focus()
-    .setImage({ src: data.url, alt: data.name })
+    .setImage({ src: data.url, alt: data.name, title: data.name })
     .run()
 }
 </script>

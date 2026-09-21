@@ -1,7 +1,7 @@
 import type { CommandProps, NodeViewRenderer } from '@tiptap/core'
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import EditorImageUploadNode from './EditorImageUploadNode.vue'
+import JImageUpload from './JImageUpload.vue'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -26,7 +26,7 @@ export const ImageUpload = Node.create({
     return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'image-upload' })]
   },
   addNodeView(): NodeViewRenderer {
-    return VueNodeViewRenderer(EditorImageUploadNode)
+    return VueNodeViewRenderer(JImageUpload)
   },
   addCommands() {
     return {

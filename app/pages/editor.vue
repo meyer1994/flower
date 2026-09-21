@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
-import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { ImageUpload } from '~/components/editor/extensions'
-import { Handlers } from '~/components/editor/handler'
+import type { JEventSave } from '~/components/JEditor.vue'
 
+const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 const { $trpc } = useNuxtApp()
@@ -16,107 +14,18 @@ const { data, error } = await useAsyncData('content',
 )
 if (error.value) console.error(error.value)
 
-const content = ref<JSONContent>(data.value?.body ?? { type: 'doc', content: [] })
-
-const items: EditorToolbarItem<typeof Handlers>[][] = [
-  [
-    { kind: 'undo', icon: 'i-lucide-undo', tooltip: { text: 'Undo' } },
-    { kind: 'redo', icon: 'i-lucide-redo', tooltip: { text: 'Redo' } },
-  ],
-  [
-    {
-      icon: 'i-lucide-heading',
-      tooltip: { text: 'Headings' },
-      content: { align: 'start' },
-      items: [
-        { kind: 'heading', level: 1, icon: 'i-lucide-heading-1', label: 'Heading 1' },
-        { kind: 'heading', level: 2, icon: 'i-lucide-heading-2', label: 'Heading 2' },
-        { kind: 'heading', level: 3, icon: 'i-lucide-heading-3', label: 'Heading 3' },
-      ],
-    },
-    {
-      icon: 'i-lucide-list',
-      tooltip: { text: 'Lists' },
-      content: { align: 'start' },
-      items: [
-        { kind: 'bulletList', icon: 'i-lucide-list', label: 'Bullet List' },
-        { kind: 'orderedList', icon: 'i-lucide-list-ordered', label: 'Ordered List' },
-      ],
-    },
-    { kind: 'blockquote', icon: 'i-lucide-text-quote', tooltip: { text: 'Blockquote' } },
-    { kind: 'codeBlock', icon: 'i-lucide-square-code', tooltip: { text: 'Code Block' } },
-    { kind: 'imageUpload', icon: 'i-lucide-image', label: 'Add image' },
-  ],
-  [
-    { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', tooltip: { text: 'Bold' } },
-    { kind: 'mark', mark: 'italic', icon: 'i-lucide-italic', tooltip: { text: 'Italic' } },
-    { kind: 'mark', mark: 'underline', icon: 'i-lucide-underline', tooltip: { text: 'Underline' } },
-    { kind: 'mark', mark: 'strike', icon: 'i-lucide-strikethrough', tooltip: { text: 'Strikethrough' } },
-    { kind: 'mark', mark: 'code', icon: 'i-lucide-code', tooltip: { text: 'Code' } },
-  ],
-]
-
-const commands: EditorSuggestionMenuItem[][] = [
-  [
-    { type: 'label', label: 'Text' },
-    { kind: 'paragraph', label: 'Paragraph', icon: 'i-lucide-type' },
-    { kind: 'heading', level: 1, label: 'Heading 1', icon: 'i-lucide-heading-1' },
-    { kind: 'heading', level: 2, label: 'Heading 2', icon: 'i-lucide-heading-2' },
-    { kind: 'heading', level: 3, label: 'Heading 3', icon: 'i-lucide-heading-3' },
-  ],
-  [
-    { type: 'label', label: 'Lists' },
-    { kind: 'bulletList', label: 'Bullet List', icon: 'i-lucide-list' },
-    { kind: 'orderedList', label: 'Numbered List', icon: 'i-lucide-list-ordered' },
-  ],
-  [
-    { type: 'label', label: 'Insert' },
-    { kind: 'blockquote', label: 'Blockquote', icon: 'i-lucide-text-quote' },
-    { kind: 'codeBlock', label: 'Code Block', icon: 'i-lucide-square-code' },
-    { kind: 'horizontalRule', label: 'Divider', icon: 'i-lucide-separator-horizontal' },
-  ],
-]
-
-const toast = useToast()
-
-const save = async () => {
-  if (!content.value) return
-  if (!data.value?.id) return
-
+const save = async (payload: JEventSave) => {
   try {
-    await $trpc.editor.update.mutate({ id: data.value.id, body: content.value })
+    if (!data.value) return
+    await $trpc.editor.update.mutate({ id: payload.id, body: payload.content })
     toast.add({ title: 'Content saved', color: 'primary', duration: 1000 })
-    router.replace({ query: { id: data.value.id } })
+    router.replace({ query: { id: payload.id } })
   }
   catch (error) {
     console.error(error)
     toast.add({ title: 'Error saving content', color: 'error' })
   }
 }
-
-const saveItem: EditorToolbarItem[][] = [[{
-  icon: 'i-lucide-save',
-  tooltip: { text: 'Save' },
-  onClick: () => save(),
-  color: 'primary',
-  variant: 'solid',
-}]]
-
-const extensions = [
-  ImageUpload,
-  Extension.create({
-    name: 'editorKeymap',
-    addKeyboardShortcuts(): Record<string, KeyboardShortcutCommand> {
-      return {
-        'Mod-Shift-Enter': () => {
-          console.log('Mod-Shift-Enter')
-          void save()
-          return true
-        },
-      }
-    },
-  }),
-]
 </script>
 
 <template>
@@ -131,55 +40,12 @@ const extensions = [
         :ui="{ body: 'p-0' }"
         class="overflow-hidden"
       >
-        <UEditor
-          v-slot="{ editor }"
-          v-model="content"
-          content-type="json"
-          placeholder="/ for commands"
-          :ui="{ base: 'px-4 sm:px-6 py-4 min-h-64' }"
-          :extensions="extensions"
-          :handlers="Handlers"
-          class="prose dark:prose-invert bg-default"
-        >
-          <div class="flex items-center justify-between">
-            <UEditorToolbar
-              :editor="editor"
-              :items="items"
-              class="overflow-x-auto"
-            />
-
-            <UEditorToolbar
-              :editor="editor"
-              :items="saveItem"
-            />
-          </div>
-
-          <UEditorToolbar
-            :editor="editor"
-            :items="items"
-            layout="bubble"
-          />
-
-          <UEditorDragHandle
-            :editor="editor"
-            icon="i-lucide-grip-vertical"
-          />
-
-          <UEditorSuggestionMenu
-            :editor="editor"
-            :items="commands"
-          />
-        </UEditor>
-      </UCard>
-
-      <UCard
-        title="v-model (JSON)"
-        :ui="{ body: 'p-0' }"
-        class="overflow-hidden"
-      >
-        <pre
-          class="p-4 text-xs font-mono text-muted-foreground bg-muted/50 overflow-auto h-96 whitespace-pre-wrap break-words"
-        >{{ content }}</pre>
+        <JEditor
+          v-if="data"
+          :id="data.id"
+          v-model="data.body"
+          @save="save"
+        />
       </UCard>
     </div>
   </UContainer>
