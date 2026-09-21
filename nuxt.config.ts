@@ -1,10 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    '@nuxt/eslint',
-    '@vueuse/nuxt',
-    '@nuxt/ui',
-  ],
+  modules: ['@nuxt/eslint', '@vueuse/nuxt', '@nuxt/ui', '@nuxt/image'],
 
   devtools: {
     enabled: false,
