@@ -2,31 +2,54 @@
   "mcpServers": {
     "nuxt-ui": {
       "type": "http",
-      "url": "https://ui.nuxt.com/mcp"
+      "url": "https://ui.nuxt.com/mcp",
+      "directTools": [
+        "get-component",
+        "get-example",
+        "get-template",
+        "list-examples",
+        "search-components",
+        "search-documentation",
+        "read_components",
+        "read_examples"
+      ]
     },
     "nuxt": {
       "type": "http",
-      "url": "https://nuxt.com/mcp"
+      "url": "https://nuxt.com/mcp",
+      "directTools": [
+        "get-documentation-page",
+        "list-documentation-pages"
+      ]
     },
     "trpc-nuxt": {
       "type": "http",
-      "url": "https://gitmcp.io/wobsoriano/trpc-nuxt"
+      "url": "https://gitmcp.io/wobsoriano/trpc-nuxt",
+      "directTools": true
     },
     "better-auth": {
       "type": "http",
-      "url": "https://gitmcp.io/better-auth/better-auth"
+      "url": "https://gitmcp.io/better-auth/better-auth",
+      "directTools": true
     },
     "drizzle-orm": {
       "type": "http",
-      "url": "https://gitmcp.io/drizzle-team/drizzle-orm"
+      "url": "https://gitmcp.io/drizzle-team/drizzle-orm",
+      "directTools": true
     },
     "vueuse": {
       "type": "http",
-      "url": "https://gitmcp.io/vueuse/vueuse"
+      "url": "https://gitmcp.io/vueuse/vueuse",
+      "directTools": true
     },
     "playwright": {
       "command": "pnpx",
-      "args": ["@playwright/mcp@latest", "--browser", "firefox"]
+      "args": [
+        "@playwright/mcp@latest",
+        "--browser",
+        "firefox"
+      ],
+      "directTools": true
     }
   }
 }

@@ -19,6 +19,7 @@
     "cf:types": "wrangler types shared/wrangler.d.ts && eslint --fix shared/wrangler.d.ts"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.134",
     "@aws-sdk/client-s3": "^3.1136.0",
     "@aws-sdk/lib-storage": "^3.1136.0",
     "@aws-sdk/s3-request-presigner": "^3.1136.0",
@@ -31,8 +32,6 @@
     "@vueuse/nuxt": "^15.0.0",
     "aws4fetch": "^1.0.20",
     "better-auth": "^1.7.5",
-    "better-call": "^1.4.0",
-    "db0": "^0.4.1",
     "drizzle-orm": "^0.45.2",
     "nuxt": "^4.5.2",
     "tailwindcss": "^4.3.3",
@@ -42,9 +41,6 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.134",
-    "@nuxt/test-utils": "^4.3.2",
-    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^25.9.8",
     "auth": "^1.7.5",
     "dotenv-cli": "^11.0.0",
@@ -53,7 +49,6 @@
     "nitro-cloudflare-dev": "^0.2.2",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.11",
     "vue-tsc": "^3.3.11",
     "wrangler": "^4.135.0"
   }

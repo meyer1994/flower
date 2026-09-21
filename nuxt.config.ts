@@ -41,6 +41,15 @@ export default defineNuxtConfig({
         '@trpc/client/links/loggerLink',
         'better-auth/vue',
         'zod',
+        // TipTap/ProseMirror must be pre-bundled as one graph or the browser
+        // loads two copies of prosemirror-* (via @tiptap/pm AND @tiptap/y-tiptap)
+        // -> keyed plugin collision / "Can not convert <> to a Fragment".
+        // Same include as the official nuxt-ui-templates/editor config.
+        '@nuxt/ui > prosemirror-state',
+        '@nuxt/ui > prosemirror-transform',
+        '@nuxt/ui > prosemirror-model',
+        '@nuxt/ui > prosemirror-view',
+        '@nuxt/ui > prosemirror-gapcursor',
       ],
     },
   },

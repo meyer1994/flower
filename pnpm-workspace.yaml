@@ -1,3 +1,16 @@
+# pnpm workspace + package settings (pnpm v10+ reads these here, not from package.json)
+# https://pnpm.io/settings
+overrides:
+  # Nuxt UI's Editor bundles TipTap. Keep the whole @tiptap/* graph on the same
+  # 3.31.3 line: otherwise pnpm resolves stale 3.23.5 extensions whose
+  # @tiptap/y-tiptap pulls a separate prosemirror-* consumer root, loading two
+  # copies of prosemirror-model -> RangeError "Can not convert <> to a Fragment".
+  '@tiptap/extension-collaboration': 3.31.3
+  '@tiptap/extension-drag-handle': 3.31.3
+  '@tiptap/extension-drag-handle-vue-3': 3.31.3
+  '@tiptap/extension-node-range': 3.31.3
+  '@tiptap/y-tiptap': 3.0.9
+
 allowBuilds:
   '@parcel/watcher': true
   '@prisma/client': true
