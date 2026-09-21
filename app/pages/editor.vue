@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
+import { ImageUpload } from '~/components/editor/extensions'
+import { Handlers } from '~/components/editor/handler'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,7 +18,7 @@ if (error.value) console.error(error.value)
 
 const content = ref<JSONContent>(data.value?.body ?? { type: 'doc', content: [] })
 
-const items: EditorToolbarItem[][] = [
+const items: EditorToolbarItem<typeof Handlers>[][] = [
   [
     { kind: 'undo', icon: 'i-lucide-undo', tooltip: { text: 'Undo' } },
     { kind: 'redo', icon: 'i-lucide-redo', tooltip: { text: 'Redo' } },
@@ -43,6 +45,7 @@ const items: EditorToolbarItem[][] = [
     },
     { kind: 'blockquote', icon: 'i-lucide-text-quote', tooltip: { text: 'Blockquote' } },
     { kind: 'codeBlock', icon: 'i-lucide-square-code', tooltip: { text: 'Code Block' } },
+    { kind: 'imageUpload', icon: 'i-lucide-image', label: 'Add image' },
   ],
   [
     { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', tooltip: { text: 'Bold' } },
@@ -99,21 +102,20 @@ const saveItem: EditorToolbarItem[][] = [[{
   variant: 'solid',
 }]]
 
-const keymap = Extension.create({
-  name: 'editorKeymap',
-  addKeyboardShortcuts(): Record<string, KeyboardShortcutCommand> {
-    return {
-      'Mod-Shift-Enter': () => {
-        console.log('Mod-Shift-Enter')
-        void save()
-        return true
-      },
-    }
-  },
-})
-
-const extensions: Extension[] = [
-  keymap,
+const extensions = [
+  ImageUpload,
+  Extension.create({
+    name: 'editorKeymap',
+    addKeyboardShortcuts(): Record<string, KeyboardShortcutCommand> {
+      return {
+        'Mod-Shift-Enter': () => {
+          console.log('Mod-Shift-Enter')
+          void save()
+          return true
+        },
+      }
+    },
+  }),
 ]
 </script>
 
@@ -136,6 +138,7 @@ const extensions: Extension[] = [
           placeholder="/ for commands"
           :ui="{ base: 'px-4 sm:px-6 py-4 min-h-64' }"
           :extensions="extensions"
+          :handlers="Handlers"
           class="prose dark:prose-invert bg-default"
         >
           <div class="flex items-center justify-between">
