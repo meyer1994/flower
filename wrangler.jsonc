@@ -3,51 +3,44 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "flower",
-  "main": "./.output/server/index.mjs",
-  "compatibility_date": "2026-09-20",
-  
-  "observability": {
-    "enabled": true
-  },
-
-  "upload_source_maps": true,
-
-  "compatibility_flags": [
-    // needed for better-auth to work on cloudflare workers
-    "global_fetch_strictly_public"
-  ],
-
-
-  /**
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "edtr",
+	"main": "./.output/server/index.mjs",
+	"compatibility_date": "2026-09-20",
+	"observability": {
+		"enabled": true
+	},
+	"upload_source_maps": true,
+	"compatibility_flags": [
+		// needed for better-auth to work on cloudflare workers
+		"global_fetch_strictly_public"
+	],
+	/**
 	 * Bindings
 	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
 	 * databases, object storage, AI inference, real-time communication and more.
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "flower",
-      "database_id": "ced49fa0-2b3e-406b-95a0-56666f8c918e",
-      "migrations_dir": "./server/db/migrations"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "FILES",
-      "bucket_name": "flower",
-      "remote": true,
-    }
-  ],
-
-  /**
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "edtr",
+			"migrations_dir": "./server/db/migrations",
+			"database_id": "ea5c3dae-38a6-4717-a351-52b5bf6a3b08"
+		}
+	],
+	"r2_buckets": [
+		{
+			"bucket_name": "edtr",
+			"binding": "FILES"
+		}
+	],
+	/**
 	 * Static Assets
 	 * https://developers.cloudflare.com/workers/static-assets/binding/
 	 */
-  "assets": {
-    "directory": "./.output/public/",
-    "binding": "ASSETS"
-  }
+	"assets": {
+		"directory": "./.output/public/",
+		"binding": "ASSETS"
+	}
 }

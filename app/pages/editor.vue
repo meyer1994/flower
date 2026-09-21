@@ -3,6 +3,7 @@ import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type KeyboardShortcutCommand } from '@tiptap/core'
 
 const route = useRoute()
+const router = useRouter()
 const { $trpc } = useNuxtApp()
 
 const { data, error } = await useAsyncData('content',
@@ -73,27 +74,34 @@ const commands: EditorSuggestionMenuItem[][] = [
 ]
 
 const toast = useToast()
+
+const save = async () => {
+  if (!data.value) return
+
+  try {
+    await $trpc.editor.update.mutate({ id: data.value.id, body: content.value })
+    toast.add({ title: 'Content saved', color: 'primary', duration: 1000 })
+    router.replace({ query: { id: data.value.id } })
+  }
+  catch {
+    toast.add({ title: 'Error saving content', color: 'error' })
+  }
+}
+
+const saveItem: EditorToolbarItem[][] = [[{
+  icon: 'i-lucide-save',
+  tooltip: { text: 'Save' },
+  onClick: () => save(),
+  color: 'primary',
+  variant: 'solid',
+}]]
+
 const keymap = Extension.create({
   name: 'editorKeymap',
   addKeyboardShortcuts(): Record<string, KeyboardShortcutCommand> {
     return {
       'Mod-Shift-Enter': () => {
-        if (!data.value) return true
-        void $trpc.editor.update.mutate({ id: data.value.id, body: content.value })
-          .catch(() => toast.add({
-            title: 'Error saving content',
-            description: 'Mod+Shift+Enter',
-            color: 'error',
-          }))
-          .then(() => toast.add({
-            title: 'Content saved',
-            description: 'Mod+Shift+Enter',
-            color: 'primary',
-          }))
-          .then(() => {
-            if (!data.value?.id) return
-            void navigateTo({ query: { id: data.value?.id }, replace: true })
-          })
+        void save()
         return true
       },
     }
@@ -114,16 +122,6 @@ const extensions: Extension[] = [
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       <UCard
-        title="v-model (JSON)"
-        :ui="{ body: 'p-0' }"
-        class="overflow-hidden"
-      >
-        <pre
-          class="p-4 text-xs font-mono text-muted-foreground bg-muted/50 overflow-auto h-96 whitespace-pre-wrap break-words"
-        >{{ content }}</pre>
-      </UCard>
-
-      <UCard
         :ui="{ body: 'p-0' }"
         class="overflow-hidden"
       >
@@ -132,15 +130,22 @@ const extensions: Extension[] = [
           v-model="content"
           content-type="markdown"
           placeholder="/ for commands"
-          :ui="{ base: 'px-6 py-4 min-h-64' }"
+          :ui="{ base: 'px-4 sm:px-6 py-4 min-h-64' }"
           :extensions="extensions"
           class="prose dark:prose-invert bg-default"
         >
-          <UEditorToolbar
-            :editor="editor"
-            :items="items"
-            class="border-b border-muted px-4 py-2 overflow-x-auto"
-          />
+          <div class="flex items-center justify-between border-b border-muted sm:px-4 py-2">
+            <UEditorToolbar
+              :editor="editor"
+              :items="items"
+              class="overflow-x-auto"
+            />
+
+            <UEditorToolbar
+              :editor="editor"
+              :items="saveItem"
+            />
+          </div>
 
           <UEditorToolbar
             :editor="editor"
@@ -153,6 +158,16 @@ const extensions: Extension[] = [
             :items="commands"
           />
         </UEditor>
+      </UCard>
+
+      <UCard
+        title="v-model (JSON)"
+        :ui="{ body: 'p-0' }"
+        class="overflow-hidden"
+      >
+        <pre
+          class="p-4 text-xs font-mono text-muted-foreground bg-muted/50 overflow-auto h-96 whitespace-pre-wrap break-words"
+        >{{ content }}</pre>
       </UCard>
     </div>
   </UContainer>
