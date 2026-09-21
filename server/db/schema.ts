@@ -1,3 +1,4 @@
+import type { JSONContent } from '@tiptap/core'
 import { desc, sql } from 'drizzle-orm'
 import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { uuidv7 } from 'uuidv7'
@@ -9,9 +10,10 @@ export const TContent = sqliteTable('content',
     id: text('id')
       .notNull()
       .$default(() => uuidv7()),
-    body: text('body')
+    body: text('body', { mode: 'json' })
       .notNull()
-      .$default(() => ''),
+      .$type<JSONContent>()
+      .$default(() => ({ type: 'doc', content: [] })),
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()
       .$default(() => sql`CURRENT_TIMESTAMP`),

@@ -1,3 +1,4 @@
+import type { JSONContent } from '@tiptap/core'
 import { TRPCError, type inferRouterInputs, type inferRouterOutputs } from '@trpc/server'
 import { desc, eq } from 'drizzle-orm'
 import z from 'zod'
@@ -19,7 +20,7 @@ export const appRouter = createTRPCRouter({
       .mutation(async ({ ctx }) => {
         const row = await ctx.db
           .insert(TContent)
-          .values({ body: '' })
+          .values({ body: { type: 'doc', content: [] } })
           .returning()
           .get()
         if (!row) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
@@ -27,7 +28,7 @@ export const appRouter = createTRPCRouter({
       }),
 
     update: baseProcedure
-      .input(z.object({ id: z.string().min(1), body: z.string() }))
+      .input(z.object({ id: z.string().min(1), body: z.custom<JSONContent>() }))
       .mutation(async ({ ctx, input }) => {
         const row = await ctx.db
           .insert(TContent)

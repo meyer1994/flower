@@ -27,6 +27,7 @@
     "@nuxt/eslint": "1.17.0",
     "@nuxt/ui": "^4.11.1",
     "@tiptap/core": "^3.31.3",
+    "@tiptap/vue-3": "3.31.3",
     "@trpc/client": "^11.19.0",
     "@trpc/server": "^11.19.0",
     "@vueuse/core": "^15.0.0",

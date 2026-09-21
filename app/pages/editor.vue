@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
-import { Extension, type KeyboardShortcutCommand } from '@tiptap/core'
+import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
 
 const route = useRoute()
 const router = useRouter()
@@ -10,10 +10,11 @@ const { data, error } = await useAsyncData('content',
   async () => {
     if (!route.query.id) return await $trpc.editor.create.mutate()
     return await $trpc.editor.get.query({ id: route.query.id as string })
-  })
+  },
+)
 if (error.value) console.error(error.value)
 
-const content = ref(data.value?.body ?? '')
+const content = ref<JSONContent>(data.value?.body ?? { type: 'doc', content: [] })
 
 const items: EditorToolbarItem[][] = [
   [
@@ -76,14 +77,16 @@ const commands: EditorSuggestionMenuItem[][] = [
 const toast = useToast()
 
 const save = async () => {
-  if (!data.value) return
+  if (!content.value) return
+  if (!data.value?.id) return
 
   try {
     await $trpc.editor.update.mutate({ id: data.value.id, body: content.value })
     toast.add({ title: 'Content saved', color: 'primary', duration: 1000 })
     router.replace({ query: { id: data.value.id } })
   }
-  catch {
+  catch (error) {
+    console.error(error)
     toast.add({ title: 'Error saving content', color: 'error' })
   }
 }
@@ -101,6 +104,7 @@ const keymap = Extension.create({
   addKeyboardShortcuts(): Record<string, KeyboardShortcutCommand> {
     return {
       'Mod-Shift-Enter': () => {
+        console.log('Mod-Shift-Enter')
         void save()
         return true
       },
@@ -128,13 +132,13 @@ const extensions: Extension[] = [
         <UEditor
           v-slot="{ editor }"
           v-model="content"
-          content-type="markdown"
+          content-type="json"
           placeholder="/ for commands"
           :ui="{ base: 'px-4 sm:px-6 py-4 min-h-64' }"
           :extensions="extensions"
           class="prose dark:prose-invert bg-default"
         >
-          <div class="flex items-center justify-between border-b border-muted sm:px-4 py-2">
+          <div class="flex items-center justify-between">
             <UEditorToolbar
               :editor="editor"
               :items="items"
@@ -151,6 +155,11 @@ const extensions: Extension[] = [
             :editor="editor"
             :items="items"
             layout="bubble"
+          />
+
+          <UEditorDragHandle
+            :editor="editor"
+            icon="i-lucide-grip-vertical"
           />
 
           <UEditorSuggestionMenu
