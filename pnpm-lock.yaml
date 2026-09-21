@@ -4,13 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@tiptap/extension-collaboration': 3.31.3
-  '@tiptap/extension-drag-handle': 3.31.3
-  '@tiptap/extension-drag-handle-vue-3': 3.31.3
-  '@tiptap/extension-node-range': 3.31.3
-  '@tiptap/y-tiptap': 3.0.9
-
 importers:
 
   .:
@@ -1924,14 +1917,14 @@ packages:
       '@tiptap/core': ^3
       '@tiptap/extension-bubble-menu': ^3
       '@tiptap/extension-code': ^3
-      '@tiptap/extension-collaboration': 3.31.3
-      '@tiptap/extension-drag-handle': 3.31.3
-      '@tiptap/extension-drag-handle-vue-3': 3.31.3
+      '@tiptap/extension-collaboration': ^3
+      '@tiptap/extension-drag-handle': ^3
+      '@tiptap/extension-drag-handle-vue-3': ^3
       '@tiptap/extension-floating-menu': ^3
       '@tiptap/extension-horizontal-rule': ^3
       '@tiptap/extension-image': ^3
       '@tiptap/extension-mention': ^3
-      '@tiptap/extension-node-range': 3.31.3
+      '@tiptap/extension-node-range': ^3
       '@tiptap/extension-placeholder': ^3
       '@tiptap/markdown': ^3
       '@tiptap/pm': ^3
@@ -2781,7 +2774,7 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.31.3
       '@tiptap/pm': 3.31.3
-      '@tiptap/y-tiptap': 3.0.9
+      '@tiptap/y-tiptap': ^3.0.7
       yjs: ^13
 
   '@tiptap/extension-document@3.31.3':
@@ -2804,7 +2797,7 @@ packages:
       '@tiptap/extension-collaboration': 3.31.3
       '@tiptap/extension-node-range': 3.31.3
       '@tiptap/pm': 3.31.3
-      '@tiptap/y-tiptap': 3.0.9
+      '@tiptap/y-tiptap': ^3.0.7
 
   '@tiptap/extension-dropcursor@3.31.3':
     resolution: {integrity: sha512-NWomSfu5CSC7VacnMSDzKT8qm66SzMfZwVPEtwY5bPpRTJgTiT1rNK0neDrrzfMN27MfylGyKWWf7Q5Qf8w/fg==}
