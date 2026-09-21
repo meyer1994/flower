@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { GlobalAttrs, ImageUpload } from '~/components/editor/extensions'
+import { JGlobalAttrs, JImage, JImageUpload } from '~/components/editor/extensions'
 import { Handlers } from '~/components/editor/handler'
 
 type Props = { id: string }
@@ -9,10 +9,7 @@ const props = defineProps<Props>()
 const model = defineModel<JSONContent>({ required: true })
 
 export type JEventSave = { id: string, content: JSONContent }
-
-type Emits = {
-  (e: 'save', payload: JEventSave): void
-}
+type Emits = { (e: 'save', payload: JEventSave): void }
 const emit = defineEmits<Emits>()
 
 // left toolbar items
@@ -87,8 +84,10 @@ const commands: EditorSuggestionMenuItem[][] = [
 
 // extensions
 const extensions = [
-  ImageUpload,
-  GlobalAttrs({ jid: props.id }),
+  JImage,
+  JImageUpload,
+
+  JGlobalAttrs({ id: props.id }),
 
   // custom keymap
   Extension.create({

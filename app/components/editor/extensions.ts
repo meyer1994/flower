@@ -1,18 +1,22 @@
 import type { CommandProps, NodeViewRenderer } from '@tiptap/core'
 import { Extension, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import JImageUpload from './JImageUpload.vue'
+import JImageNode from './JImage.vue'
+import JImageUploadNode from './JImageUpload.vue'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
-    imageUpload: {
-      insertImageUpload: () => ReturnType
+    jImageUpload: {
+      insertJImageUpload: () => ReturnType
+    }
+    jImage: {
+      insertJImage: (options: { imageId: string }) => ReturnType
     }
   }
 }
 
-export const ImageUpload = Node.create({
-  name: 'imageUpload',
+export const JImageUpload = Node.create({
+  name: 'jImageUpload',
   group: 'block',
   atom: true,
   draggable: true,
@@ -20,30 +24,58 @@ export const ImageUpload = Node.create({
     return {}
   },
   parseHTML() {
-    return [{ tag: 'div[data-type="image-upload"]' }]
+    return [{ tag: 'div[data-type="j-image-upload"]' }]
   },
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'image-upload' })]
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'j-image-upload' })]
   },
   addNodeView(): NodeViewRenderer {
-    return VueNodeViewRenderer(JImageUpload)
+    return VueNodeViewRenderer(JImageUploadNode)
   },
   addCommands() {
     return {
-      insertImageUpload: () => ({ commands }: CommandProps) => {
+      insertJImageUpload: () => ({ commands }: CommandProps) => {
         return commands.insertContent({ type: this.name })
       },
     }
   },
 })
 
+export const JImage = Node.create({
+  name: 'jImage',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      imageId: { default: null as string | null },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'img[data-type="j-image"]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['img', mergeAttributes(HTMLAttributes, { 'data-type': 'j-image' })]
+  },
+  addNodeView(): NodeViewRenderer {
+    return VueNodeViewRenderer(JImageNode)
+  },
+  addCommands() {
+    return {
+      insertJImage: ({ imageId }: { imageId: string }) => ({ commands }: CommandProps) => {
+        return commands.insertContent({ type: this.name, attrs: { imageId } })
+      },
+    }
+  },
+})
+
 type Attrs = {
-  jid: string
+  id: string
 }
 
-export const GlobalAttrs = (attrs: Attrs) => Extension.create({
-  name: 'globalAttrs',
+export const JGlobalAttrs = (attrs: Attrs) => Extension.create({
+  name: 'jGlobalAttrs',
   addGlobalAttributes() {
-    return [{ types: 'nodes', attributes: { jid: { default: attrs.jid } } }]
+    return [{ types: 'nodes', attributes: { id: { default: attrs.id } } }]
   },
 })
