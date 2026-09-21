@@ -15,7 +15,7 @@
   "upload_source_maps": true,
 
   "compatibility_flags": [
-    "nodejs_compat_v2",
+    // needed for better-auth to work on cloudflare workers
     "global_fetch_strictly_public"
   ],
 
