@@ -14,7 +14,7 @@
     "postinstall": "nuxt prepare",
     "auth:generate": "auth generate --config auth.config.ts --output server/db/auth.ts -y && eslint --fix server/db/auth.ts",
     "db:generate": "pnpm run auth:generate && drizzle-kit generate",
-    "db:migrate": "wrangler d1 migrations apply flower",
+    "db:migrate": "wrangler d1 migrations apply edtr",
     "cf:deploy": "wrangler --cwd .output deploy",
     "cf:types": "wrangler types shared/wrangler.d.ts && eslint --fix shared/wrangler.d.ts"
   },
