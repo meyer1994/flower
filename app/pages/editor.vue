@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui';
+import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
+import type { Extension } from '@tiptap/core'
 
-const value = ref(`
-# Hello, Editor
+const value = ref(`# Hello, Editor
 
 This is the Nuxt UI **Editor** component, powered by *TipTap*.
 
 Select some text to reveal the bubble toolbar, or use the fixed toolbar above.
 
 ### Features
+
 - **Bold** · *Italic* · <u>Underline</u> · ~~Strikethrough~~ · \`code\`
 - Headings, lists, blockquotes and code blocks
 - Markdown, HTML and JSON content
 
-> Tip: use the fixed toolbar to add a code block or quote.
-`)
+> Tip: use the fixed toolbar to add a code block or quote.`)
 
 const items: EditorToolbarItem[][] = [
   [
@@ -73,6 +73,10 @@ const commands: EditorSuggestionMenuItem[][] = [
     { kind: 'horizontalRule', label: 'Divider', icon: 'i-lucide-separator-horizontal' },
   ],
 ]
+
+const extensions: Extension[] = [
+  useEditorKeymap(),
+]
 </script>
 
 <template>
@@ -103,6 +107,7 @@ const commands: EditorSuggestionMenuItem[][] = [
           content-type="markdown"
           placeholder="/ for commands"
           :ui="{ base: 'px-6 py-4 min-h-64' }"
+          :extensions="extensions"
           class="prose dark:prose-invert bg-default"
         >
           <UEditorToolbar

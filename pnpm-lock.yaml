@@ -29,6 +29,9 @@ importers:
       '@nuxt/ui':
         specifier: ^4.11.1
         version: 4.11.1(1048ecb08e0e087aa32961b8e2fd3f4b)
+      '@tiptap/core':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/pm@3.31.3)
       '@trpc/client':
         specifier: ^11.19.0
         version: 11.19.0(@trpc/server@11.19.0(typescript@6.0.3))(typescript@6.0.3)
