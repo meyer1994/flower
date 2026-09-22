@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload, JPdf, JPdfUpload, JPlaceholder } from '~/components/editor/extensions'
+import { JAiChat, JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload, JPdf, JPdfUpload, JPlaceholder } from '~/components/editor/extensions'
 import { Handlers } from '~/components/editor/handler'
 
 type Props = { id: string }
@@ -46,6 +46,7 @@ const itemsLeft: EditorToolbarItem<typeof Handlers>[][] = [
     { kind: 'jAudioUpload', icon: 'i-lucide-audio-lines', tooltip: { text: 'Audio' } },
     { kind: 'jPdfUpload', icon: 'i-lucide-file-text', tooltip: { text: 'PDF' } },
     { kind: 'jPlaceholder', icon: 'i-lucide-square-dashed', tooltip: { text: 'Placeholder' } },
+    { kind: 'jAiChat', icon: 'i-lucide-bot', tooltip: { text: 'AI Chat' } },
   ],
   [
     { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', tooltip: { text: 'Bold' } },
@@ -88,6 +89,7 @@ const commands: EditorSuggestionMenuItem[][] = [
     { kind: 'jImageUpload', label: 'Image', icon: 'i-lucide-image' },
     { kind: 'jPdfUpload', label: 'PDF', icon: 'i-lucide-file-text' },
     { kind: 'jPlaceholder', label: 'Placeholder', icon: 'i-lucide-square-dashed' },
+    { kind: 'jAiChat', label: 'AI Chat', icon: 'i-lucide-bot' },
   ],
 ]
 
@@ -100,6 +102,7 @@ const extensions = [
   JPdf,
   JPdfUpload,
   JPlaceholder,
+  JAiChat,
 
   JGlobalAttrs({ id: props.id }),
 

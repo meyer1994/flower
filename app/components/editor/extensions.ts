@@ -1,6 +1,7 @@
 import type { CommandProps, NodeViewRenderer } from '@tiptap/core'
 import { Extension, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import JAIChatNode from './JAIChat.vue'
 import JAudioNode from './JAudio.vue'
 import JAudioUploadNode from './JAudioUpload.vue'
 import JImageNode from './JImage.vue'
@@ -31,6 +32,9 @@ declare module '@tiptap/core' {
     }
     jPlaceholder: {
       insertJPlaceholder: () => ReturnType
+    }
+    jAiChat: {
+      insertJAiChat: (options: { chatId: string }) => ReturnType
     }
   }
 }
@@ -222,6 +226,34 @@ export const JPlaceholder = Node.create({
     return {
       insertJPlaceholder: () => ({ commands }: CommandProps) => {
         return commands.insertContent({ type: this.name })
+      },
+    }
+  },
+})
+
+export const JAiChat = Node.create({
+  name: 'jAiChat',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      chatId: { default: null as string | null },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="j-ai-chat"]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'j-ai-chat' })]
+  },
+  addNodeView(): NodeViewRenderer {
+    return VueNodeViewRenderer(JAIChatNode)
+  },
+  addCommands() {
+    return {
+      insertJAiChat: ({ chatId }: { chatId: string | null }) => ({ commands }: CommandProps) => {
+        return commands.insertContent({ type: this.name, attrs: { chatId } })
       },
     }
   },

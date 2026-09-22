@@ -1,8 +1,9 @@
 import type { JSONContent } from '@tiptap/core'
 import { TRPCError, type inferRouterInputs, type inferRouterOutputs } from '@trpc/server'
-import { desc, eq } from 'drizzle-orm'
+import { generateText } from 'ai'
+import { asc, desc, eq } from 'drizzle-orm'
 import z from 'zod'
-import { TContent } from '../db/schema'
+import { TChatMessage, TContent } from '../db/schema'
 import { baseProcedure, createTRPCRouter } from '../lib/trpc'
 
 export const appRouter = createTRPCRouter({
@@ -51,6 +52,80 @@ export const appRouter = createTRPCRouter({
           .get()
         if (!row) throw new TRPCError({ code: 'NOT_FOUND' })
         return row
+      }),
+  }),
+
+  chat: createTRPCRouter({
+    list: baseProcedure
+      .input(z.object({ chatId: z.string().min(1) }))
+      .query(async ({ ctx, input }) => {
+        return await ctx.db
+          .select()
+          .from(TChatMessage)
+          .where(eq(TChatMessage.chatId, input.chatId))
+          .orderBy(asc(TChatMessage.createdAt))
+          .all()
+      }),
+
+    ask: baseProcedure
+      .input(z.object({
+        chatId: z.string().min(1),
+        text: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // persist the user message
+        await ctx.db
+          .insert(TChatMessage)
+          .values({ chatId: input.chatId, role: 'user', text: input.text })
+          .run()
+
+        // build conversation history
+        const history = await ctx.db
+          .select()
+          .from(TChatMessage)
+          .where(eq(TChatMessage.chatId, input.chatId))
+          .orderBy(asc(TChatMessage.createdAt))
+          .all()
+
+        // generate a non-streaming reply with Workers AI
+        const result = await generateText({
+          model: ctx.ai('@cf/zai-org/glm-5.3-flash'),
+          instructions: 'You are a helpful assistant. Keep answers concise.',
+          messages: history.map(m => ({ role: m.role, content: m.text })),
+        })
+
+        // persist the assistant reply
+        const row = await ctx.db
+          .insert(TChatMessage)
+          .values({ chatId: input.chatId, role: 'assistant', text: result.text })
+          .returning()
+          .get()
+        if (!row) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
+        return row
+      }),
+
+    append: baseProcedure
+      .input(z.object({
+        text: z.string().min(1),
+        role: z.enum(['user', 'assistant']),
+        chatId: z.string().min(1).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const row = await ctx.db
+          .insert(TChatMessage)
+          .values(input)
+          .returning()
+          .get()
+        if (!row) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
+        return row
+      }),
+
+    clear: baseProcedure
+      .input(z.object({ chatId: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        await ctx.db
+          .delete(TChatMessage)
+          .where(eq(TChatMessage.chatId, input.chatId))
       }),
   }),
 

@@ -1,6 +1,7 @@
 import { TRPCError, initTRPC } from '@trpc/server'
 import type { BetterAuthClientOptions, InferSessionFromClient, InferUserFromClient } from 'better-auth'
 import type { H3Event } from 'h3'
+import { serverAI } from './ai'
 import { serverAuth } from './auth'
 import { serverDrizzle } from './drizzle'
 import { serverFiles } from './files'
@@ -16,6 +17,7 @@ export type TRPCContext = {
   db: ReturnType<typeof serverDrizzle>
   auth: ReturnType<typeof serverAuth>
   files: ReturnType<typeof serverFiles>
+  ai: ReturnType<typeof serverAI>
 
   session: Session | null
 }
@@ -24,31 +26,28 @@ export const createTRPCContext = async (event: H3Event): Promise<TRPCContext> =>
   const db = serverDrizzle(event)
   const auth = serverAuth(event)
   const files = serverFiles(event)
+  const ai = serverAI(event)
 
   const session = await auth.api.getSession({ headers: event.headers })
 
   console.info('[server.trpc] user id', session?.user?.id)
-  return { event, db, auth, files, session }
+  return { event, db, auth, files, ai, session }
 }
 
 const t = initTRPC.context<TRPCContext>().create()
 
 const logger = t.middleware(async ({ next, ctx }) => {
-  const start = Date.now()
-
   const path = ctx.event.path.split('?')[0]
   console.info(`[server.trpc] start ${path}`)
 
-  try {
-    const result = await next({ ctx })
-    const end = Date.now()
-    console.info(`[server.trpc] end ${path} - ${end - start}ms`)
-    return result
-  }
-  catch (error) {
-    console.error('[server.trpc] error', error)
-    throw error
-  }
+  const start = Date.now()
+  const result = await next({ ctx })
+  const end = Date.now()
+
+  if (!result.ok) console.error(`[server.trpc] error ${path}`, result.error)
+  console.info(`[server.trpc] end ${path} - ${end - start}ms`)
+
+  return result
 })
 
 const isAuthenticated = t.middleware(async ({ next, ctx }) => {

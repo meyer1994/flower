@@ -7,6 +7,15 @@ export const Handlers = {
     isActive: (editor: Editor) => editor.isActive('jPlaceholder'),
     isDisabled: undefined,
   },
+  jAiChat: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jAiChat' }),
+    execute: (editor: Editor) => editor.chain().focus().insertContent({
+      type: 'jAiChat',
+      attrs: { chatId: crypto.randomUUID() },
+    }),
+    isActive: (editor: Editor) => editor.isActive('jAiChat'),
+    isDisabled: undefined,
+  },
   jImageUpload: {
     canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jImageUpload' }),
     execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'jImageUpload' }),

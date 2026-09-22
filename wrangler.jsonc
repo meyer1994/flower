@@ -35,6 +35,10 @@
 			"binding": "FILES"
 		}
 	],
+	"ai": {
+		"binding": "AI",
+		"remote": true,
+	},
 	/**
 	 * Static Assets
 	 * https://developers.cloudflare.com/workers/static-assets/binding/
