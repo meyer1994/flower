@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NodeViewWrapper, type NodeViewProps } from '@tiptap/vue-3'
+import { NodeViewWrapper, type NodeViewProps } from '@tiptap/vue-3';
 
 const { $trpc } = useNuxtApp()
 const props = defineProps<NodeViewProps>()
@@ -12,6 +12,7 @@ const { data, status } = useAsyncData('image',
   <NodeViewWrapper>
     <NuxtImg
       v-if="status === 'success' && data"
+      :key="data.key"
       :src="data.url"
       :alt="data.key"
       :title="`${data.key} (${data.size} bytes)`"
