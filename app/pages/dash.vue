@@ -2,8 +2,7 @@
 import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 
 const { $auth } = useNuxtApp()
-const { data: session, error } = await $auth.useSession()
-if (error.value) throw createError(error.value)
+const { data: session } = await $auth.useSession()
 
 const navMenu = computed<NavigationMenuItem[]>(() => {
   return [
@@ -56,6 +55,7 @@ const navMenu = computed<NavigationMenuItem[]>(() => {
             {
               label: 'Sair',
               icon: 'i-lucide-log-out',
+              disabled: !session,
               onSelect: async () => {
                 await $auth.client.signOut()
                 await reloadNuxtApp({ path: '/' })
