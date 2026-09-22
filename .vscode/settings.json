@@ -3,21 +3,21 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "always",
-      "source.organizeImports": "always"
+      "source.organizeImports": "explicit"
     }
   },
   "[vue]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "always",
-      "source.organizeImports": "always"
+      "source.organizeImports": "explicit"
     }
   },
   "[javascript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "always",
-      "source.organizeImports": "always"
+      "source.organizeImports": "explicit"
     }
   }
 }
