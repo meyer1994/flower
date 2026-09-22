@@ -1,6 +1,25 @@
 # Flower Agent Guide
 
-Vue 3 + Nuxt 4 + tRPC template deployed on Cloudflare Workers with D1 (SQLite) and R2.
+Vue 3 + Nuxt 4 + tRPC template deployed on Cloudflare Workers with D1 (SQLite)
+and R2.
+
+## Agent working style
+
+Most requests are small UI work: **create a component**, **move/wire it into
+place**, and **mirror an existing sibling**. Prefer that over inventing new
+architecture.
+
+- **Copy nearby examples first.** For TipTap nodes, start from peers under
+  `app/components/editor/` (e.g. `JPlaceholder.vue`, `JImage.vue`, `JAudio.vue`)
+  plus the matching bits in `extensions.ts`, `handler.ts`, and `JEditor.vue`.
+- **Minimal surface area.** Add the Vue file, register the
+  extension/handler/toolbar item if needed, and stop. Do not refactor unrelated
+  files, introduce abstractions, or redesign patterns unless asked.
+- **Match local conventions.** Same props (`NodeViewProps`), wrappers
+  (`NodeViewWrapper`), naming (`J*` nodes), and import style as the neighbors
+  you copy.
+- **Do not expand scope.** Skip new backend routes, schemas, deps, docs, or
+  “while we’re here” cleanups unless the user explicitly wants them.
 
 ## Stack
 
@@ -149,7 +168,8 @@ await ctx.db.select().from(TTable).where(eq(TTable.id, id)).get()
 
 ## tRPC (Backend)
 
-Procedures live in `server/trpc/index.ts`. Context is built in `server/lib/trpc.ts`.
+Procedures live in `server/trpc/index.ts`. Context is built in
+`server/lib/trpc.ts`.
 
 ### Route template
 
@@ -305,6 +325,7 @@ const emits = defineEmits<{ submit: [e: Schema] }>()
 
 - [Nuxt](https://nuxt.com/docs) · [Nuxt UI](https://ui.nuxt.com/getting-started)
 - [tRPC](https://trpc.io/docs) · [tRPC-Nuxt](https://trpc-nuxt.pages.dev/setup/)
-- [Drizzle ORM](https://orm.drizzle.team/docs/overview) · [Cloudflare D1](https://developers.cloudflare.com/d1/)
+- [Drizzle ORM](https://orm.drizzle.team/docs/overview) · [Cloudflare
+  D1](https://developers.cloudflare.com/d1/)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/commands/)
 - [Better Auth](https://www.better-auth.com/docs)
