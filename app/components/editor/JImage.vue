@@ -10,6 +10,7 @@ const { data, status } = useAsyncData('image',
 
 <template>
   <NodeViewWrapper>
+    <USkeleton v-if="status !== 'success'" />
     <NuxtImg
       v-if="status === 'success' && data"
       :key="data.key"
@@ -17,6 +18,5 @@ const { data, status } = useAsyncData('image',
       :alt="data.key"
       :title="`${data.key} (${data.size} bytes)`"
     />
-    <USkeleton v-else />
   </NodeViewWrapper>
 </template>
