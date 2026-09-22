@@ -1,6 +1,12 @@
 import type { Editor } from '@tiptap/core'
 
 export const Handlers = {
+  jPlaceholder: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jPlaceholder' }),
+    execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'jPlaceholder' }),
+    isActive: (editor: Editor) => editor.isActive('jPlaceholder'),
+    isDisabled: undefined,
+  },
   jImageUpload: {
     canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jImageUpload' }),
     execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'jImageUpload' }),

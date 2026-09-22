@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload, JPdf, JPdfUpload } from '~/components/editor/extensions'
+import { JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload, JPdf, JPdfUpload, JPlaceholder } from '~/components/editor/extensions'
 import { Handlers } from '~/components/editor/handler'
 
 type Props = { id: string }
@@ -45,6 +45,7 @@ const itemsLeft: EditorToolbarItem<typeof Handlers>[][] = [
     { kind: 'jImageUpload', icon: 'i-lucide-image', tooltip: { text: 'Image' } },
     { kind: 'jAudioUpload', icon: 'i-lucide-audio-lines', tooltip: { text: 'Audio' } },
     { kind: 'jPdfUpload', icon: 'i-lucide-file-text', tooltip: { text: 'PDF' } },
+    { kind: 'jPlaceholder', icon: 'i-lucide-square-dashed', tooltip: { text: 'Placeholder' } },
   ],
   [
     { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', tooltip: { text: 'Bold' } },
@@ -84,7 +85,9 @@ const commands: EditorSuggestionMenuItem[][] = [
     { kind: 'codeBlock', label: 'Code Block', icon: 'i-lucide-square-code' },
     { kind: 'horizontalRule', label: 'Divider', icon: 'i-lucide-separator-horizontal' },
     { kind: 'jAudioUpload', label: 'Audio', icon: 'i-lucide-audio-lines' },
+    { kind: 'jImageUpload', label: 'Image', icon: 'i-lucide-image' },
     { kind: 'jPdfUpload', label: 'PDF', icon: 'i-lucide-file-text' },
+    { kind: 'jPlaceholder', label: 'Placeholder', icon: 'i-lucide-square-dashed' },
   ],
 ]
 
@@ -96,6 +99,7 @@ const extensions = [
   JAudioUpload,
   JPdf,
   JPdfUpload,
+  JPlaceholder,
 
   JGlobalAttrs({ id: props.id }),
 

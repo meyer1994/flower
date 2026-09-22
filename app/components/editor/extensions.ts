@@ -7,6 +7,7 @@ import JImageNode from './JImage.vue'
 import JImageUploadNode from './JImageUpload.vue'
 import JPdfNode from './JPdf.client.vue'
 import JPdfUploadNode from './JPdfUpload.vue'
+import JPlaceholderNode from './JPlaceholder.vue'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -27,6 +28,9 @@ declare module '@tiptap/core' {
     }
     jPdf: {
       insertJPdf: (options: { pdfId: string }) => ReturnType
+    }
+    jPlaceholder: {
+      insertJPlaceholder: () => ReturnType
     }
   }
 }
@@ -192,6 +196,32 @@ export const JPdf = Node.create({
     return {
       insertJPdf: ({ pdfId }: { pdfId: string }) => ({ commands }: CommandProps) => {
         return commands.insertContent({ type: this.name, attrs: { pdfId } })
+      },
+    }
+  },
+})
+
+export const JPlaceholder = Node.create({
+  name: 'jPlaceholder',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {}
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="j-placeholder"]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'j-placeholder' })]
+  },
+  addNodeView(): NodeViewRenderer {
+    return VueNodeViewRenderer(JPlaceholderNode)
+  },
+  addCommands() {
+    return {
+      insertJPlaceholder: () => ({ commands }: CommandProps) => {
+        return commands.insertContent({ type: this.name })
       },
     }
   },
