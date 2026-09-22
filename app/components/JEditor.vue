@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { JGlobalAttrs, JImage, JImageUpload } from '~/components/editor/extensions'
+import { JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload } from '~/components/editor/extensions'
 import { Handlers } from '~/components/editor/handler'
 
 type Props = { id: string }
@@ -40,7 +40,10 @@ const itemsLeft: EditorToolbarItem<typeof Handlers>[][] = [
     },
     { kind: 'blockquote', icon: 'i-lucide-text-quote', tooltip: { text: 'Blockquote' } },
     { kind: 'codeBlock', icon: 'i-lucide-square-code', tooltip: { text: 'Code Block' } },
-    { kind: 'imageUpload', icon: 'i-lucide-image', label: 'Add image' },
+  ],
+  [
+    { kind: 'jImageUpload', icon: 'i-lucide-image' },
+    { kind: 'jAudioUpload', icon: 'i-lucide-audio-lines' },
   ],
   [
     { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', tooltip: { text: 'Bold' } },
@@ -79,6 +82,7 @@ const commands: EditorSuggestionMenuItem[][] = [
     { kind: 'blockquote', label: 'Blockquote', icon: 'i-lucide-text-quote' },
     { kind: 'codeBlock', label: 'Code Block', icon: 'i-lucide-square-code' },
     { kind: 'horizontalRule', label: 'Divider', icon: 'i-lucide-separator-horizontal' },
+    { kind: 'jAudioUpload', label: 'Audio', icon: 'i-lucide-audio-lines' },
   ],
 ]
 
@@ -86,6 +90,8 @@ const commands: EditorSuggestionMenuItem[][] = [
 const extensions = [
   JImage,
   JImageUpload,
+  JAudio,
+  JAudioUpload,
 
   JGlobalAttrs({ id: props.id }),
 

@@ -4,18 +4,22 @@ import { NodeViewWrapper, type NodeViewProps } from '@tiptap/vue-3'
 const { $trpc } = useNuxtApp()
 const props = defineProps<NodeViewProps>()
 
-const { data, status } = useAsyncData('image',
-  async () => await $trpc.files.get.query({ id: props.node.attrs.imageId }))
+const { data, status } = useAsyncData(`audio-${props.node.attrs.audioId}`,
+  async () => await $trpc.files.get.query({ id: props.node.attrs.audioId }))
 </script>
 
 <template>
   <NodeViewWrapper>
-    <NuxtImg
+    <audio
       v-if="status === 'success' && data"
       :src="data.url"
-      :alt="data.key"
       :title="`${data.key} (${data.size} bytes)`"
+      controls
+      class="w-full"
     />
-    <USkeleton v-else />
+    <USkeleton
+      v-else
+      class="h-12 w-full"
+    />
   </NodeViewWrapper>
 </template>
