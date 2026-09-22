@@ -34,8 +34,7 @@ const save = async (payload: JEventSave) => {
 <template>
   <UContainer class="py-6 space-y-6">
     <UPageHeader
-      :title="`Editor${data?.id ? ` - ${data.id}` : ''}`"
-      description="A rich text editor example built with Nuxt UI & TipTap (Markdown)."
+      :description="`editor: ${data?.id ?? '-'}`"
     />
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -47,6 +46,7 @@ const save = async (payload: JEventSave) => {
           v-if="data"
           :id="data.id"
           v-model="content"
+          class="h-128"
           @save="save"
         />
       </UCard>
