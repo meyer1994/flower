@@ -5,6 +5,8 @@ import JAudioNode from './JAudio.vue'
 import JAudioUploadNode from './JAudioUpload.vue'
 import JImageNode from './JImage.vue'
 import JImageUploadNode from './JImageUpload.vue'
+import JPdfNode from './JPdf.client.vue'
+import JPdfUploadNode from './JPdfUpload.vue'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -19,6 +21,12 @@ declare module '@tiptap/core' {
     }
     jAudio: {
       insertJAudio: (options: { audioId: string }) => ReturnType
+    }
+    jPdfUpload: {
+      insertJPdfUpload: () => ReturnType
+    }
+    jPdf: {
+      insertJPdf: (options: { pdfId: string }) => ReturnType
     }
   }
 }
@@ -130,6 +138,60 @@ export const JAudio = Node.create({
     return {
       insertJAudio: ({ audioId }: { audioId: string }) => ({ commands }: CommandProps) => {
         return commands.insertContent({ type: this.name, attrs: { audioId } })
+      },
+    }
+  },
+})
+
+export const JPdfUpload = Node.create({
+  name: 'jPdfUpload',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {}
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="j-pdf-upload"]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'j-pdf-upload' })]
+  },
+  addNodeView(): NodeViewRenderer {
+    return VueNodeViewRenderer(JPdfUploadNode)
+  },
+  addCommands() {
+    return {
+      insertJPdfUpload: () => ({ commands }: CommandProps) => {
+        return commands.insertContent({ type: this.name })
+      },
+    }
+  },
+})
+
+export const JPdf = Node.create({
+  name: 'jPdf',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      pdfId: { default: null as string | null },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="j-pdf"]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'j-pdf' })]
+  },
+  addNodeView(): NodeViewRenderer {
+    return VueNodeViewRenderer(JPdfNode)
+  },
+  addCommands() {
+    return {
+      insertJPdf: ({ pdfId }: { pdfId: string }) => ({ commands }: CommandProps) => {
+        return commands.insertContent({ type: this.name, attrs: { pdfId } })
       },
     }
   },

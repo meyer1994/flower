@@ -19,6 +19,10 @@ export default defineNuxtConfig({
     },
   },
 
+  build: {
+    transpile: ['@vue-pdf-viewer/viewer', '@vue-pdf-viewer/annotation'],
+  },
+
   compatibilityDate: '2026-09-20',
 
   nitro: {

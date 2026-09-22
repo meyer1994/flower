@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload } from '~/components/editor/extensions'
+import { JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload, JPdf, JPdfUpload } from '~/components/editor/extensions'
 import { Handlers } from '~/components/editor/handler'
 
 type Props = { id: string }
@@ -24,9 +24,9 @@ const itemsLeft: EditorToolbarItem<typeof Handlers>[][] = [
       tooltip: { text: 'Headings' },
       content: { align: 'start' },
       items: [
-        { kind: 'heading', level: 1, icon: 'i-lucide-heading-1', label: 'Heading 1' },
-        { kind: 'heading', level: 2, icon: 'i-lucide-heading-2', label: 'Heading 2' },
-        { kind: 'heading', level: 3, icon: 'i-lucide-heading-3', label: 'Heading 3' },
+        { kind: 'heading', level: 1, icon: 'i-lucide-heading-1', label: 'H1' },
+        { kind: 'heading', level: 2, icon: 'i-lucide-heading-2', label: 'H2' },
+        { kind: 'heading', level: 3, icon: 'i-lucide-heading-3', label: 'H3' },
       ],
     },
     {
@@ -42,8 +42,9 @@ const itemsLeft: EditorToolbarItem<typeof Handlers>[][] = [
     { kind: 'codeBlock', icon: 'i-lucide-square-code', tooltip: { text: 'Code Block' } },
   ],
   [
-    { kind: 'jImageUpload', icon: 'i-lucide-image' },
-    { kind: 'jAudioUpload', icon: 'i-lucide-audio-lines' },
+    { kind: 'jImageUpload', icon: 'i-lucide-image', tooltip: { text: 'Image' } },
+    { kind: 'jAudioUpload', icon: 'i-lucide-audio-lines', tooltip: { text: 'Audio' } },
+    { kind: 'jPdfUpload', icon: 'i-lucide-file-text', tooltip: { text: 'PDF' } },
   ],
   [
     { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold', tooltip: { text: 'Bold' } },
@@ -83,6 +84,7 @@ const commands: EditorSuggestionMenuItem[][] = [
     { kind: 'codeBlock', label: 'Code Block', icon: 'i-lucide-square-code' },
     { kind: 'horizontalRule', label: 'Divider', icon: 'i-lucide-separator-horizontal' },
     { kind: 'jAudioUpload', label: 'Audio', icon: 'i-lucide-audio-lines' },
+    { kind: 'jPdfUpload', label: 'PDF', icon: 'i-lucide-file-text' },
   ],
 ]
 
@@ -92,6 +94,8 @@ const extensions = [
   JImageUpload,
   JAudio,
   JAudioUpload,
+  JPdf,
+  JPdfUpload,
 
   JGlobalAttrs({ id: props.id }),
 
@@ -134,12 +138,6 @@ const extensions = [
         :items="itemsRight"
       />
     </div>
-
-    <UEditorToolbar
-      :editor="editor"
-      :items="itemsLeft"
-      layout="bubble"
-    />
 
     <UEditorDragHandle
       :editor="editor"

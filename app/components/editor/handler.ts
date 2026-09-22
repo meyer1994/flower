@@ -13,4 +13,10 @@ export const Handlers = {
     isActive: (editor: Editor) => editor.isActive('jAudioUpload'),
     isDisabled: undefined,
   },
+  jPdfUpload: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jPdfUpload' }),
+    execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'jPdfUpload' }),
+    isActive: (editor: Editor) => editor.isActive('jPdfUpload'),
+    isDisabled: undefined,
+  },
 } as const
