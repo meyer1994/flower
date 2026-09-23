@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
+import type { EditorMentionMenuItem, EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
 import {
   JAi,
@@ -105,6 +105,29 @@ const commands: EditorSuggestionMenuItem[][] = [
   ],
 ]
 
+// mentions
+const mentions: EditorMentionMenuItem[] = [
+  {
+    label: 'username a',
+    avatar: { icon: 'i-simple-icons-github' },
+  },
+  {
+    label: 'username b',
+    avatar: { icon: 'i-simple-icons-twitter' },
+  },
+  {
+    label: 'username c',
+    avatar: { icon: 'i-simple-icons-linkedin' },
+  },
+  {
+    label: 'username d',
+    avatar: { icon: 'i-simple-icons-deepseek' },
+  },
+  {
+    label: 'username e',
+    avatar: { icon: 'i-simple-icons-zdotai' },
+  },
+]
 
 // extensions
 const extensions = [
@@ -183,6 +206,11 @@ const aicommands: EditorSuggestionMenuItem[][] = [
       char="!"
       :editor="editor"
       :items="aicommands"
+    />
+
+    <UEditorMentionMenu
+      :editor="editor"
+      :items="mentions"
     />
   </UEditor>
 </template>
