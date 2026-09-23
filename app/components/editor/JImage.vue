@@ -4,7 +4,7 @@ import { NodeViewWrapper, type NodeViewProps } from '@tiptap/vue-3'
 const { $trpc } = useNuxtApp()
 const props = defineProps<NodeViewProps>()
 
-const { data, status } = useAsyncData('image',
+const { data, status } = useAsyncData(`image-${props.node.attrs.imageId}`,
   async () => await $trpc.files.get.query({ id: props.node.attrs.imageId }))
 </script>
 

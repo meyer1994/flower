@@ -4,8 +4,7 @@ import { NodeViewWrapper, type NodeViewProps } from '@tiptap/vue-3'
 const { $trpc } = useNuxtApp()
 const props = defineProps<NodeViewProps>()
 
-const { data, status } = useAsyncData(
-  `pdf-${props.node.attrs.pdfId}`,
+const { data, status } = useAsyncData(`pdf-${props.node.attrs.pdfId}`,
   async () => await $trpc.files.get.query({ id: props.node.attrs.pdfId }),
   { server: false },
 )
