@@ -3,7 +3,7 @@ import { TRPCError, type inferRouterInputs, type inferRouterOutputs } from '@trp
 import { generateText } from 'ai'
 import { asc, desc, eq } from 'drizzle-orm'
 import z from 'zod'
-import { TChatMessage, TContent } from '../db/schema'
+import { TAiQuery, TChatMessage, TContent } from '../db/schema'
 import { baseProcedure, createTRPCRouter } from '../lib/trpc'
 
 export const appRouter = createTRPCRouter({
@@ -126,6 +126,36 @@ export const appRouter = createTRPCRouter({
         await ctx.db
           .delete(TChatMessage)
           .where(eq(TChatMessage.chatId, input.chatId))
+      }),
+  }),
+
+  ai: createTRPCRouter({
+    ask: baseProcedure
+      .input(z.object({ prompt: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await generateText({
+          model: ctx.ai('@cf/zai-org/glm-5.3-flash'),
+          instructions: 'You are a helpful assistant. Keep answers concise.',
+          prompt: input.prompt,
+        })
+
+        const row = await ctx.db.insert(TAiQuery)
+          .values({ prompt: input.prompt, response: result.text })
+          .returning()
+          .get()
+
+        if (!row) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
+        return row
+      }),
+
+    get: baseProcedure
+      .input(z.object({ id: z.string().min(1) }))
+      .query(async ({ ctx, input }) => {
+        return await ctx.db
+          .select()
+          .from(TAiQuery)
+          .where(eq(TAiQuery.id, input.id))
+          .get() ?? null
       }),
   }),
 

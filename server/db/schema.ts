@@ -28,6 +28,29 @@ export const TContent = sqliteTable('content',
   ],
 )
 
+export const TAiQuery = sqliteTable('ai_query',
+  {
+    id: text('id')
+      .notNull()
+      .$default(() => uuidv7())
+      .primaryKey(),
+    prompt: text('prompt')
+      .notNull(),
+    response: text('response')
+      .notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$default(() => sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$default(() => sql`CURRENT_TIMESTAMP`)
+      .$onUpdateFn(() => sql`CURRENT_TIMESTAMP`),
+  },
+  t => [
+    index('idx_ai_query_created_at').on(desc(t.createdAt)),
+  ],
+)
+
 export const TChatMessage = sqliteTable('chat_message',
   {
     id: text('id')
