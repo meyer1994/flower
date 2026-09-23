@@ -1,7 +1,19 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { Extension, type JSONContent, type KeyboardShortcutCommand } from '@tiptap/core'
-import { JAiChat, JAudio, JAudioUpload, JGlobalAttrs, JImage, JImageUpload, JPdf, JPdfUpload, JPlaceholder } from '~/components/editor/extensions'
+import {
+  JAi,
+  JAiChat,
+  JAiInput,
+  JAudio,
+  JAudioUpload,
+  JGlobalAttrs,
+  JImage,
+  JImageUpload,
+  JPdf,
+  JPdfUpload,
+  JPlaceholder,
+} from '~/components/editor/extensions'
 import { Handlers } from '~/components/editor/handler'
 
 type Props = { id: string }
@@ -93,6 +105,7 @@ const commands: EditorSuggestionMenuItem[][] = [
   ],
 ]
 
+
 // extensions
 const extensions = [
   JImage,
@@ -103,6 +116,8 @@ const extensions = [
   JPdfUpload,
   JPlaceholder,
   JAiChat,
+  JAi,
+  JAiInput,
 
   JGlobalAttrs({ id: props.id }),
 
@@ -119,6 +134,14 @@ const extensions = [
       }
     },
   }),
+]
+
+const aicommands: EditorSuggestionMenuItem[][] = [
+  [
+    { type: 'label', label: 'AI' },
+    { kind: 'jAiChat', label: 'AI Chat', icon: 'i-lucide-bot' },
+    { kind: 'jAiInput', label: 'AI Prompt', icon: 'i-lucide-wand-sparkles' },
+  ],
 ]
 </script>
 
@@ -154,6 +177,12 @@ const extensions = [
     <UEditorSuggestionMenu
       :editor="editor"
       :items="commands"
+    />
+
+    <UEditorSuggestionMenu
+      char="!"
+      :editor="editor"
+      :items="aicommands"
     />
   </UEditor>
 </template>

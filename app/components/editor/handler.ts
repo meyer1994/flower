@@ -16,6 +16,24 @@ export const Handlers = {
     isActive: (editor: Editor) => editor.isActive('jAiChat'),
     isDisabled: undefined,
   },
+  jAiInput: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jAiInput' }),
+    execute: (editor: Editor) => editor.chain().focus().insertContent({
+      type: 'jAiInput',
+      attrs: { aiId: crypto.randomUUID() },
+    }),
+    isActive: (editor: Editor) => editor.isActive('jAiInput'),
+    isDisabled: undefined,
+  },
+  jAi: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jAi' }),
+    execute: (editor: Editor) => editor.chain().focus().insertContent({
+      type: 'jAi',
+      attrs: { id: crypto.randomUUID() },
+    }),
+    isActive: (editor: Editor) => editor.isActive('jAi'),
+    isDisabled: undefined,
+  },
   jImageUpload: {
     canExecute: (editor: Editor) => editor.can().insertContent({ type: 'jImageUpload' }),
     execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'jImageUpload' }),

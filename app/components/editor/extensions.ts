@@ -1,7 +1,9 @@
 import type { CommandProps, NodeViewRenderer } from '@tiptap/core'
 import { Extension, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import JAINode from './JAI.vue'
 import JAIChatNode from './JAIChat.vue'
+import JAIInputNode from './JAIInput.vue'
 import JAudioNode from './JAudio.vue'
 import JAudioUploadNode from './JAudioUpload.vue'
 import JImageNode from './JImage.vue'
@@ -35,6 +37,12 @@ declare module '@tiptap/core' {
     }
     jAiChat: {
       insertJAiChat: (options: { chatId: string }) => ReturnType
+    }
+    jAiInput: {
+      insertJAiInput: () => ReturnType
+    }
+    jAi: {
+      insertJAi: (options: { aiId: string }) => ReturnType
     }
   }
 }
@@ -254,6 +262,60 @@ export const JAiChat = Node.create({
     return {
       insertJAiChat: ({ chatId }: { chatId: string | null }) => ({ commands }: CommandProps) => {
         return commands.insertContent({ type: this.name, attrs: { chatId } })
+      },
+    }
+  },
+})
+
+export const JAiInput = Node.create({
+  name: 'jAiInput',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {}
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="j-ai-input"]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'j-ai-input' })]
+  },
+  addNodeView(): NodeViewRenderer {
+    return VueNodeViewRenderer(JAIInputNode)
+  },
+  addCommands() {
+    return {
+      insertJAiInput: () => ({ commands }: CommandProps) => {
+        return commands.insertContent({ type: this.name })
+      },
+    }
+  },
+})
+
+export const JAi = Node.create({
+  name: 'jAi',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      aiId: { default: null as string | null },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="j-ai"]' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'j-ai' })]
+  },
+  addNodeView(): NodeViewRenderer {
+    return VueNodeViewRenderer(JAINode, { trackNodeViewPosition: true })
+  },
+  addCommands() {
+    return {
+      insertJAi: ({ aiId }: { aiId: string }) => ({ commands }: CommandProps) => {
+        return commands.insertContent({ type: this.name, attrs: { aiId } })
       },
     }
   },
